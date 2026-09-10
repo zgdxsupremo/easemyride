@@ -1,0 +1,262 @@
+/* ==========================================================================
+   EaseMyRide — Admin Dashboard Stylesheet
+   Clean, modern portal with stats, filtering, and data export
+   ========================================================================== */
+
+.admin-body {
+  background-color: #F1F5F9;
+  min-height: 100vh;
+}
+
+.admin-header {
+  background: var(--secondary);
+  color: var(--white);
+  padding: 1rem 0;
+  border-bottom: 3px solid var(--accent);
+}
+
+.admin-nav-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--white);
+}
+
+.admin-badge-dev {
+  background: var(--warning);
+  color: var(--secondary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+
+.admin-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-main {
+  padding: 2.5rem 0 4rem;
+}
+
+/* KPI Cards Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.stat-card {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-fast);
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.stat-label {
+  font-size: 0.82rem;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--secondary);
+  line-height: 1;
+}
+
+.stat-card.stat-new { border-left: 4px solid var(--primary); }
+.stat-card.stat-pending { border-left: 4px solid var(--warning); }
+.stat-card.stat-confirmed { border-left: 4px solid var(--success); }
+.stat-card.stat-cancelled { border-left: 4px solid var(--danger); }
+
+/* Control Toolbar & Exports */
+.admin-toolbar {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-grow: 1;
+  max-width: 600px;
+}
+
+.export-btns-group {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* Data Table */
+.table-card {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.admin-table th {
+  background: var(--gray-100);
+  color: var(--gray-700);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--gray-200);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--gray-100);
+  vertical-align: middle;
+  color: var(--gray-700);
+}
+
+.admin-table tbody tr:hover {
+  background-color: var(--gray-50);
+}
+
+.admin-table tbody tr.row-new {
+  background-color: #ECFDF5;
+  font-weight: 500;
+}
+
+.booking-id-tag {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 0.85rem;
+}
+
+/* Status Badges */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.status-pill.status-new {
+  background: #D1FAE5;
+  color: #065F46;
+}
+
+.status-pill.status-contacted {
+  background: #EFF6FF;
+  color: #1E40AF;
+}
+
+.status-pill.status-confirmed {
+  background: #FEF3C7;
+  color: #92400E;
+}
+
+.status-pill.status-completed {
+  background: #E0E7FF;
+  color: #3730A3;
+}
+
+.status-pill.status-cancelled {
+  background: #FEE2E2;
+  color: #991B1B;
+}
+
+/* Admin Auth Gate */
+.admin-auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--secondary);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.admin-auth-card {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  max-width: 420px;
+  width: 100%;
+  padding: 2.5rem 2rem;
+  box-shadow: var(--shadow-xl);
+  text-align: center;
+}
+
+.admin-auth-card h3 {
+  margin-bottom: 0.5rem;
+}
+
+.admin-auth-card p {
+  font-size: 0.88rem;
+  color: var(--gray-600);
+  margin-bottom: 1.5rem;
+}
+
+.dev-note-box {
+  background: var(--warning-subtle);
+  border: 1px solid #FDE68A;
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  font-size: 0.8rem;
+  color: #92400E;
+  margin-top: 1.25rem;
+  text-align: left;
+}

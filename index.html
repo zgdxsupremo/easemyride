@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EaseMyRide — Outstation Cabs, One Way, Round Trip & Airport Transfers</title>
+  <meta name="description" content="Book verified outstation cabs, one way taxi, round trips, local sightseeing and airport transfers across India with EaseMyRide. Transparent fares and 24x7 support.">
+  <meta name="keywords" content="cab booking, taxi service, outstation cabs, one way cab, round trip taxi, airport transfer, intercity cab India, EaseMyRide">
+  <link rel="canonical" href="https://easemyride.com/">
+
+  <!-- Open Graph / Meta -->
+  <meta property="og:title" content="EaseMyRide — Intercity Cabs & Taxi Booking">
+  <meta property="og:description" content="Simple rides. Better journeys. Book reliable cabs across 500+ Indian cities with zero hidden charges.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://easemyride.com/">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- Favicon / Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <!-- Core CSS -->
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+
+  <!-- JSON-LD TaxiService Schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TaxiService",
+    "name": "EaseMyRide",
+    "url": "https://easemyride.com",
+    "logo": "https://easemyride.com/assets/images/logo.png",
+    "telephone": "+91-9876543210",
+    "priceRange": "₹₹",
+    "areaServed": "India",
+    "description": "Premium intercity cab service providing one-way, round-trip, local sightseeing and airport taxis."
+  }
+  </script>
+</head>
+<body>
+
+  <!-- Dynamic Header -->
+  <header class="site-header" id="site-header"></header>
+
+  <!-- Hero Section & Booking Widget -->
+  <section class="hero-section" id="booking-widget">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>India's Trusted Intercity Cab Network</span>
+        </div>
+        <h1 class="hero-title">Your Ride. Your Route. Your Way.</h1>
+        <p class="hero-subtitle">
+          Book reliable cabs for one-way trips, round trips, local sightseeing and airport transfers with guaranteed transparent fares.
+        </p>
+      </div>
+
+      <!-- Main Search & Booking Widget -->
+      <div class="search-widget-wrapper">
+        <!-- Service Tabs -->
+        <div class="widget-tabs" role="tablist" aria-label="Cab Services">
+          <button type="button" class="tab-btn active" data-service="oneway" role="tab" aria-selected="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            <span>One Way</span>
+          </button>
+          <button type="button" class="tab-btn" data-service="roundtrip" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+            <span>Round Trip</span>
+          </button>
+          <button type="button" class="tab-btn" data-service="local" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Local Sightseeing</span>
+          </button>
+          <button type="button" class="tab-btn" data-service="airport" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+            <span>Airport Transfer</span>
+          </button>
+        </div>
+
+        <!-- Dynamic Form Body -->
+        <div class="widget-content">
+          <form id="hero-search-form" class="search-form" novalidate>
+            <div class="form-grid">
+              
+              <!-- Pickup City Input -->
+              <div class="form-group" id="group-pickup-city">
+                <label for="pickup-city" id="pickup-city-label">Pickup City</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
+                  <input type="text" id="pickup-city" class="form-control" placeholder="e.g., Delhi, NCR" autocomplete="off" required>
+                </div>
+                <span class="invalid-feedback"></span>
+              </div>
+
+              <!-- Drop City Input (One Way & Round Trip) -->
+              <div class="form-group" id="group-drop-city">
+                <label for="drop-city">Drop City</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 19 21 12 17 5 21 12 2"/></svg>
+                  <input type="text" id="drop-city" class="form-control" placeholder="e.g., Chandigarh" autocomplete="off" required>
+                </div>
+                <span class="invalid-feedback"></span>
+              </div>
+
+              <!-- Local Package Selector (Local Sightseeing) -->
+              <div class="form-group" id="group-local-package" style="display:none;">
+                <label for="local-package-select">Package Duration</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <select id="local-package-select" class="form-control">
+                    <option value="4hr40km">4 Hours / 40 KM (Half Day)</option>
+                    <option value="8hr80km" selected>8 Hours / 80 KM (Full Day)</option>
+                    <option value="12hr120km">12 Hours / 120 KM (Extended Tour)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Airport Options (Airport Transfer) -->
+              <div class="form-group" id="group-airport-fields" style="display:none; grid-column: 1 / -1;">
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
+                  <div class="form-group">
+                    <label for="airport-select">Select Airport</label>
+                    <select id="airport-select" class="form-control">
+                      <option value="DEL">Delhi (DEL) - IGI Airport</option>
+                      <option value="IXC">Chandigarh (IXC) - Int'l Airport</option>
+                      <option value="ATQ">Amritsar (ATQ) - Sri Guru Ram Dass</option>
+                      <option value="BOM">Mumbai (BOM) - CSMIA Airport</option>
+                      <option value="BLR">Bengaluru (BLR) - Kempegowda</option>
+                      <option value="JAI">Jaipur (JAI) - Jaipur Airport</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Transfer Direction</label>
+                    <div class="radio-pills">
+                      <div class="radio-pill">
+                        <input type="radio" id="dir-to-city" name="airport_transfer_type" value="airport_to_city" checked>
+                        <label for="dir-to-city">Airport ➔ City</label>
+                      </div>
+                      <div class="radio-pill">
+                        <input type="radio" id="dir-to-airport" name="airport_transfer_type" value="city_to_airport">
+                        <label for="dir-to-airport">City ➔ Airport</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pickup Date -->
+              <div class="form-group">
+                <label for="pickup-date">Pickup Date</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <input type="date" id="pickup-date" class="form-control" required>
+                </div>
+                <span class="invalid-feedback"></span>
+              </div>
+
+              <!-- Pickup Time -->
+              <div class="form-group">
+                <label for="pickup-time">Pickup Time</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <input type="time" id="pickup-time" class="form-control" required>
+                </div>
+                <span class="invalid-feedback"></span>
+              </div>
+
+              <!-- Return Date (Round Trip) -->
+              <div class="form-group" id="group-return-date" style="display:none;">
+                <label for="return-date">Return Date</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <input type="date" id="return-date" class="form-control">
+                </div>
+                <span class="invalid-feedback"></span>
+              </div>
+
+              <!-- Return Time (Round Trip) -->
+              <div class="form-group" id="group-return-time" style="display:none;">
+                <label for="return-time">Return Time</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <input type="time" id="return-time" class="form-control">
+                </div>
+                <span class="invalid-feedback"></span>
+              </div>
+
+              <!-- Phone Number Input -->
+              <div class="form-group">
+                <label for="customer-phone">Mobile Number</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  <input type="tel" id="customer-phone" class="form-control" placeholder="10-digit Mobile No." maxlength="10" required>
+                </div>
+                <span class="invalid-feedback"></span>
+              </div>
+
+            </div>
+
+            <!-- Action Bar -->
+            <div class="widget-action-bar">
+              <div class="search-note">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                <span>Guaranteed clean cars, verified drivers & instant price calculation.</span>
+              </div>
+              <button type="submit" id="btn-search-cabs" class="btn btn-primary btn-lg">
+                <span>Explore Available Cabs</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Services Section -->
+  <section class="section section-alt" id="services">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Cab Services Tailored For You</h2>
+        <p class="section-subtitle">Whether traveling one-way between cities or heading to the airport, we provide transparent fares with zero return fare penalties.</p>
+      </div>
+
+      <div class="services-grid">
+        <!-- Service 1: One Way -->
+        <div class="service-card">
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </div>
+          <h3 class="service-title">One Way Cabs</h3>
+          <p class="service-desc">Travel between cities without paying for the return journey. Ideal for relocations, single meetings, or flights from nearby hubs.</p>
+          <a href="oneway.html" class="service-link">
+            <span>Learn More</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+
+        <!-- Service 2: Round Trip -->
+        <div class="service-card">
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+          </div>
+          <h3 class="service-title">Round Trip Cabs</h3>
+          <p class="service-desc">Comfortable outstation travel for your complete journey. Keep the dedicated car and driver with you throughout your vacation or multi-city trip.</p>
+          <a href="roundtrip.html" class="service-link">
+            <span>Learn More</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+
+        <!-- Service 3: Local Sightseeing -->
+        <div class="service-card">
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3 class="service-title">Local Sightseeing</h3>
+          <p class="service-desc">Explore your city with flexible 4hr, 8hr or 12hr cab packages. Perfect for shopping sprees, family tours, and corporate errands.</p>
+          <a href="local.html" class="service-link">
+            <span>Learn More</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+
+        <!-- Service 4: Airport Transfer -->
+        <div class="service-card">
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+          </div>
+          <h3 class="service-title">Airport Transfers</h3>
+          <p class="service-desc">Reliable, on-time pickups and drops to and from major airport terminals with zero surge charges and flight delay tracking.</p>
+          <a href="airport.html" class="service-link">
+            <span>Learn More</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Timeline -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">How EaseMyRide Works</h2>
+        <p class="section-subtitle">Book your cab in four effortless steps with instant route pricing and confirmed booking credentials.</p>
+      </div>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <h4 class="step-title">Enter Your Trip</h4>
+          <p class="step-desc">Choose your journey type, pickup/drop location, and scheduled travel date and time.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <h4 class="step-title">Compare Ride Options</h4>
+          <p class="step-desc">Browse transparent vehicle fares across Hatchback, Sedan, SUV, and Innova Crysta categories.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <h4 class="step-title">Choose Your Car</h4>
+          <p class="step-desc">Pick the vehicle that fits your group size, luggage requirements, and comfort preferences.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">4</div>
+          <h4 class="step-title">Confirm Your Booking</h4>
+          <p class="step-desc">Receive your unique Booking ID and SMS confirmation instantly. Pay directly during the trip.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why EaseMyRide (Trust & Safety) -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Why Travel With EaseMyRide</h2>
+        <p class="section-subtitle">Designed to remove the friction and uncertainty of long-distance road travel in India.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-box">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+          </div>
+          <div class="feature-content">
+            <h4>Transparent Pricing</h4>
+            <p>Know exactly what you pay. Clear distance-based formulas with no hidden surcharges or surprise fees.</p>
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="feature-content">
+            <h4>Verified Highway Chauffeurs</h4>
+            <p>Experienced commercial drivers trained specifically in intercity highway safety and polite customer etiquette.</p>
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+          </div>
+          <div class="feature-content">
+            <h4>Multiple Car Categories</h4>
+            <p>From pocket-friendly Hatchbacks and Sedans to spacious Innovas and luxury Crystas for group outings.</p>
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div class="feature-content">
+            <h4>24x7 Customer Support</h4>
+            <p>Direct helpline and WhatsApp support available round-the-clock for route changes, updates and assistance.</p>
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z"/></svg>
+          </div>
+          <div class="feature-content">
+            <h4>Doorstep Pickup</h4>
+            <p>No walking to taxi stands. Your chauffeur arrives directly at your residence, hotel, or office landmark.</p>
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="feature-content">
+            <h4>Zero Advance Required</h4>
+            <p>Book your ride without upfront credit card obligations. Simple payment directly after your trip is completed.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Intercity Routes -->
+  <section class="section" id="popular-routes">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Popular Intercity Routes</h2>
+        <p class="section-subtitle">Click any route below to prefill your search with guaranteed baseline sedan fares.</p>
+      </div>
+
+      <div class="routes-grid" id="popular-routes-grid">
+        <!-- Injected dynamically via app.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Sample Customer Feedback / Testimonials -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="hero-badge">Sample Customer Feedback</span>
+        <h2 class="section-title">What Our Riders Say</h2>
+        <p class="section-subtitle">Real experiences from travelers who booked intercity journeys with EaseMyRide.</p>
+      </div>
+
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"Booked an Innova Crysta for a family trip from Delhi to Chandigarh. Driver was on time at 6:00 AM, car was spotless, and the pricing was completely transparent."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">RS</div>
+            <div class="author-info">
+              <h5>Rohan Sharma</h5>
+              <span>Delhi ➔ Chandigarh (One Way)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"The one-way option saved us nearly 40% compared to local cab operators who charge two-way return fare. Easy booking and zero hassles."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">AK</div>
+            <div class="author-info">
+              <h5>Amanpreet Kaur</h5>
+              <span>Amritsar ➔ Chandigarh</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"Booked an airport transfer from Kempegowda to city. Driver tracked my flight delay and waited without any extra hassle. Highly recommended!"</p>
+          <div class="testimonial-author">
+            <div class="author-avatar">VS</div>
+            <div class="author-info">
+              <h5>Vikas Sundaram</h5>
+              <span>BLR Airport ➔ Bengaluru City</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Frequently Asked Questions -->
+  <section class="section" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <p class="section-subtitle">Everything you need to know about booking with EaseMyRide.</p>
+      </div>
+
+      <div class="faq-container">
+        <div class="faq-item active">
+          <button class="faq-question" type="button">
+            <span>How do I book a cab with EaseMyRide?</span>
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            Simply select your service type (One Way, Round Trip, Local Sightseeing, or Airport Transfer), enter your pickup/drop cities, select your travel date/time, compare available car categories, and confirm your booking with your contact details. You'll receive a unique Booking ID instantly.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>How is the fare calculated?</span>
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            Our one-way fares are calculated using deterministic road distance formulas: for Sedan, <code>(Distance KM × 11) + ₹400</code>. Larger vehicle categories such as SUV and Innova Crysta have fixed transparent adjustments. For round trips, fares cover both legs with driver allowances included.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>Are toll charges and state taxes included in the fare?</span>
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            No. The displayed base fare includes the vehicle, fuel, and chauffeur allowance. Highway toll taxes, state border entry permits, and airport parking fees are payable directly by the customer as per actual receipts generated during the journey.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>What happens after I submit my booking request?</span>
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            Your booking is assigned a unique reference code (e.g. EMR-20260828-0001) and recorded in our dispatch system. Our operations team verifies driver availability and contacts you via phone/SMS with assigned driver and vehicle details prior to pickup.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>Which vehicle models are available in each category?</span>
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            We provide Hatchbacks (Swift, WagonR), Sedans (Dzire, Etios, Aura), SUVs (Ertiga, Carens), Innova (Standard 7-seater), and Innova Crysta (Executive luxury). Exact model availability depends on the specific route and schedule.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>Can I cancel or modify my booking?</span>
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            Yes. You can modify or cancel your booking free of charge up to 4 hours before the scheduled departure time by contacting our 24/7 helpline at +91 98765 43210.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dynamic Footer -->
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <!-- Scripts -->
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/validation.js"></script>
+  <script src="assets/js/distance.js"></script>
+  <script src="assets/js/pricing.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

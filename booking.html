@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Your Booking — EaseMyRide</title>
+  <meta name="description" content="Enter passenger and address details to secure your cab booking with EaseMyRide.">
+  <link rel="canonical" href="https://easemyride.com/booking.html">
+
+  <!-- Fonts & Styles -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/main.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+
+  <!-- Dynamic Header -->
+  <header class="site-header" id="site-header"></header>
+
+  <main class="container">
+    <div class="booking-layout">
+      <!-- Left Column: Booking Form -->
+      <div class="booking-form-col">
+        <div style="margin-bottom: 1.5rem;">
+          <a href="javascript:history.back()" style="display:inline-flex; align-items:center; gap:0.4rem; font-size:0.9rem; font-weight:600; color:var(--gray-600); margin-bottom:0.5rem;">
+            <span>← Back to Ride Options</span>
+          </a>
+          <h1 style="font-size:2rem; color:var(--secondary);">Passenger & Trip Information</h1>
+          <p style="color:var(--gray-600); font-size:0.95rem;">
+            Please provide accurate pickup and contact details so our chauffeur can reach you seamlessly.
+          </p>
+        </div>
+
+        <form id="booking-checkout-form" novalidate>
+          <!-- Card 1: Passenger Contact -->
+          <div class="booking-card">
+            <h3 class="card-heading">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>1. Passenger Details</span>
+            </h3>
+
+            <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+              <div class="form-group">
+                <label for="passenger-name">Full Name *</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <input type="text" id="passenger-name" class="form-control" placeholder="e.g. Rahul Sharma" required>
+                </div>
+                <span class="invalid-feedback"></span>
+              </div>
+
+              <div class="form-group">
+                <label for="passenger-email">Email Address *</label>
+                <div class="input-with-icon">
+                  <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                  <input type="email" id="passenger-email" class="form-control" placeholder="e.g. rahul@example.com" required>
+                </div>
+                <span class="invalid-feedback"></span>
+              </div>
+
+              <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="passenger-phone">Mobile Number (For Driver & SMS Updates) *</label>
+                <div class="input-with-icon">
+                  <span style="position:absolute; left:0.9rem; font-weight:700; color:var(--gray-600); font-size:0.9rem; pointer-events:none;">+91</span>
+                  <input type="tel" id="passenger-phone" class="form-control" style="padding-left: 3rem;" placeholder="10-digit Phone Number" maxlength="10" required>
+                </div>
+                <span class="invalid-feedback"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Pickup & Dropoff Addresses -->
+          <div class="booking-card">
+            <h3 class="card-heading">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>2. Pickup & Dropoff Addresses</span>
+            </h3>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="pickup-address">Complete Pickup Address / Landmark *</label>
+              <textarea id="pickup-address" class="form-control" rows="2" placeholder="House/Flat No, Street, Landmark or Hotel Name" required></textarea>
+              <span class="invalid-feedback"></span>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;" id="booking-drop-address-group">
+              <label for="drop-address">Destination Drop Address / Landmark</label>
+              <textarea id="drop-address" class="form-control" rows="2" placeholder="Drop Location / Area or Hotel Name in Destination City"></textarea>
+              <span class="invalid-feedback"></span>
+            </div>
+
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 1.25rem;">
+              <div class="form-group">
+                <label for="booking-start-date">Pickup Date *</label>
+                <input type="date" id="booking-start-date" class="form-control" required>
+                <span class="invalid-feedback"></span>
+              </div>
+              <div class="form-group">
+                <label for="booking-start-time">Pickup Time *</label>
+                <input type="time" id="booking-start-time" class="form-control" required>
+                <span class="invalid-feedback"></span>
+              </div>
+            </div>
+
+            <!-- Dynamic Return Date Grid (Round Trip) -->
+            <div class="form-grid" id="booking-return-group" style="grid-template-columns: 1fr 1fr; display:none;">
+              <div class="form-group">
+                <label for="booking-return-date">Return Date *</label>
+                <input type="date" id="booking-return-date" class="form-control">
+                <span class="invalid-feedback"></span>
+              </div>
+              <div class="form-group">
+                <label for="booking-return-time">Return Time *</label>
+                <input type="time" id="booking-return-time" class="form-control">
+                <span class="invalid-feedback"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: Remarks & Additional Instructions -->
+          <div class="booking-card">
+            <h3 class="card-heading">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              <span>3. Special Instructions</span>
+            </h3>
+
+            <div class="form-group">
+              <label for="trip-remarks">Anything we should know about your trip?</label>
+              <textarea id="trip-remarks" class="form-control" rows="2" placeholder="e.g., Traveling with elderly, extra luggage space needed, flight number if airport transfer..."></textarea>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div style="margin-top: 2rem;">
+            <button type="submit" id="btn-submit-booking" class="btn btn-primary btn-lg btn-block">
+              <span>Confirm & Receive Booking ID</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
+            <div style="text-align:center; font-size:0.82rem; color:var(--gray-500); margin-top:0.75rem;">
+              By clicking "Confirm", you agree to EaseMyRide's <a href="terms.html" target="_blank" style="text-decoration:underline;">Terms</a> & <a href="cancellation-policy.html" target="_blank" style="text-decoration:underline;">Cancellation Policy</a>.
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Right Column: Sticky Trip Summary -->
+      <aside class="booking-summary-col" id="trip-summary-sidebar-container">
+        <!-- Injected via booking.js -->
+      </aside>
+    </div>
+  </main>
+
+  <!-- Dynamic Footer -->
+  <footer class="site-footer" id="site-footer"></footer>
+
+  <!-- Scripts -->
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/validation.js"></script>
+  <script src="assets/js/distance.js"></script>
+  <script src="assets/js/pricing.js"></script>
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/booking.js"></script>
+</body>
+</html>
