@@ -1,6 +1,6 @@
-# 🚗 EaseMyRide — Cab Booking Platform MVP
+# 🚗 RideOnDemand — Cab Booking Platform MVP
 
-**EaseMyRide** is a production-quality, high-converting Indian cab-booking platform MVP built with **Vanilla HTML5, CSS3, and modern Vanilla JavaScript (ES6)** on the frontend and **Google Apps Script + Google Sheets** as the lightweight backend and live database.
+**RideOnDemand** is a production-quality, high-converting Indian cab-booking platform MVP built with **Vanilla HTML5, CSS3, and modern Vanilla JavaScript (ES6)** on the frontend and **Google Apps Script + Google Sheets** as the lightweight backend and live database.
 
 ---
 
@@ -105,7 +105,7 @@ Deploy to any static hosting provider within seconds:
 ### Deploy to Cloudflare Pages / Vercel / Netlify / GitHub Pages:
 1. Push the `/easemyride` repository to GitHub or upload the folder directly.
 2. Set the publish directory to the root `/` (no build command needed).
-3. Connect your custom domain (e.g. `https://easemyride.com`).
+3. Connect your custom domain (e.g. `https://rideondemand.com`).
 
 ---
 
@@ -162,7 +162,7 @@ Open the `CONFIG` sheet in your Google Sheet and edit the value next to `Sedan R
 
 ## 🆔 Booking ID Generation & Security
 
-- **Client Preview**: Generates structured reference IDs (`EMR-YYYYMMDD-XXXX`).
+- **Client Preview**: Generates structured reference IDs (`ROD-YYYYMMDD-XXXX`).
 - **Server Confirmation**: The Google Apps Script backend verifies and stamps the unique sequence ID.
 - **Server-Side Price Validation**: The backend recalculates the fare from raw distance and vehicle type parameters before storing to prevent client-side inspection tampering.
 
