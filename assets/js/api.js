@@ -23,7 +23,7 @@ const ApiService = (() => {
   }
 
   /**
-   * Helper to generate a unique client fallback Booking ID (EMR-YYYYMMDD-XXXX).
+   * Helper to generate a unique client fallback Booking ID (ROD-YYYYMMDD-XXXX).
    */
   function generateFallbackBookingId() {
     const now = new Date();
@@ -31,7 +31,7 @@ const ApiService = (() => {
     const m = String(now.getMonth() + 1).padStart(2, "0");
     const d = String(now.getDate()).padStart(2, "0");
     const rand = Math.floor(1000 + Math.random() * 9000);
-    return `EMR-${y}${m}${d}-${rand}`;
+    return `ROD-${y}${m}${d}-${rand}`;
   }
 
   /**
@@ -272,7 +272,7 @@ const ApiService = (() => {
     if (bookings.length === 0) {
       const demoBookings = [
         {
-          bookingId: "EMR-20260828-1001",
+          bookingId: "ROD-20260828-1001",
           bookingTimestamp: new Date(Date.now() - 3600000 * 2).toISOString(),
           bookingStatus: "NEW",
           fullName: "Rahul Sharma",
@@ -294,11 +294,11 @@ const ApiService = (() => {
           vehicleAdjustment: 0,
           finalFare: 2930,
           remarks: "Please arrive 10 mins early.",
-          generatedSms: "RideOnDemand: Your cab booking request has been received. Booking ID: EMR-20260828-1001. Route: Amritsar -> Chandigarh. Fare: ₹2,930.",
+          generatedSms: "RideOnDemand: Your cab booking request has been received. Booking ID: ROD-20260828-1001. Route: Amritsar -> Chandigarh. Fare: ₹2,930.",
           smsStatus: "READY"
         },
         {
-          bookingId: "EMR-20260828-1002",
+          bookingId: "ROD-20260828-1002",
           bookingTimestamp: new Date(Date.now() - 3600000 * 5).toISOString(),
           bookingStatus: "CONFIRMED",
           fullName: "Pooja Verma",
@@ -320,7 +320,7 @@ const ApiService = (() => {
           vehicleAdjustment: 4000,
           finalFare: 9880,
           remarks: "Luggage space needed for 4 bags.",
-          generatedSms: "RideOnDemand: Your cab booking request has been received. Booking ID: EMR-20260828-1002. Route: Delhi -> Jaipur. Fare: ₹9,880.",
+          generatedSms: "RideOnDemand: Your cab booking request has been received. Booking ID: ROD-20260828-1002. Route: Delhi -> Jaipur. Fare: ₹9,880.",
           smsStatus: "SENT"
         }
       ];

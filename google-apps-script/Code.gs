@@ -99,14 +99,14 @@ function handleCreateBooking(data) {
   var sheet = getOrCreateSheet(ss, SHEET_BOOKINGS, getBookingsHeaders());
   var config = readBusinessConfig(ss);
 
-  // 1. Generate Verified Unique Booking ID: EMR-YYYYMMDD-XXXX
+  // 1. Generate Verified Unique Booking ID: ROD-YYYYMMDD-XXXX
   var now = new Date();
   var yyyy = now.getFullYear();
   var mm = ("0" + (now.getMonth() + 1)).slice(-2);
   var dd = ("0" + now.getDate()).slice(-2);
   var count = sheet.getLastRow(); // Row count gives simple monotonic sequence base
   var seq = ("000" + count).slice(-4);
-  var bookingId = "EMR-" + yyyy + mm + dd + "-" + seq;
+  var bookingId = "ROD-" + yyyy + mm + dd + "-" + seq;
 
   // 2. Server-side Untrusted Input Protection: Recalculate Fare
   var distKm = Math.max(1, Number(data.distanceKm) || 1);
@@ -135,7 +135,7 @@ function handleCreateBooking(data) {
   }
 
   // 3. Generate Customer SMS Text
-  var helpline = config.helplineNumber || "+91 98765 43210";
+  var helpline = config.helplineNumber || "+91 79737 85807";
   var route = (data.fromCity && data.toCity) ? (data.fromCity + " → " + data.toCity) : (data.fromCity || "Local");
   var generatedSms = "RideOnDemand: Your cab booking request has been received successfully.\n" +
     "Booking ID: " + bookingId + "\n" +
@@ -341,7 +341,7 @@ function handleGetAdminData() {
 function readBusinessConfig(ss) {
   var sheet = getOrCreateSheet(ss, SHEET_CONFIG, ["Key", "Value", "Description"]);
   var config = {
-    helplineNumber: "+91 98765 43210",
+    helplineNumber: "+91 79737 85807",
     sedanRate: 11,
     baseFare: 400,
     suvAdjustment: 3000,
@@ -356,7 +356,7 @@ function readBusinessConfig(ss) {
   if (values.length <= 1) {
     // Seed default CONFIG values
     var seed = [
-      ["Helpline Number", "+91 98765 43210", "Customer support phone number"],
+      ["Helpline Number", "+91 79737 85807", "Customer support phone number"],
       ["Sedan Rate", "11", "Rate per KM for Sedan category"],
       ["Base Fare", "400", "Base flagdown fare added to distance rate"],
       ["SUV Adjustment", "3000", "Price added over Sedan for 6-seater SUV"],
