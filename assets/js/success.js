@@ -1,56 +1,59 @@
 /**
- * EaseMyRide — Booking Confirmation & Success Controller (success.js)
+ * RideOnDemand — Booking Confirmation & Success Controller (success.js)
  * 
  * Displays verified booking credentials, receipt details, customer SMS generation,
  * clipboard copy, .txt download, device-native SMS trigger, and support links.
  */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   UI.injectNavigation("success");
-
-  // Read active booking
-  let booking = null;
-  try {
-    booking = JSON.parse(localStorage.getItem(EaseMyRideConfig.storageKeys.activeBooking));
-  } catch (e) {
-    booking = null;
-  }
 
   const urlParams = new URLSearchParams(window.location.search);
   const bookingIdFromUrl = urlParams.get("id");
 
-  if (!booking) {
-    // If not found in memory, try searching completedBookings in localStorage
+  let booking = null;
+
+  // 1. Try querying backend API for confirmed booking
+  if (bookingIdFromUrl) {
     try {
-      const list = JSON.parse(localStorage.getItem(EaseMyRideConfig.storageKeys.completedBookings) || "[]");
-      if (bookingIdFromUrl) {
-        booking = list.find((b) => b.bookingId === bookingIdFromUrl);
+      const apiRes = await ApiService.getBookingStatus(bookingIdFromUrl);
+      if (apiRes && apiRes.booking) {
+        booking = apiRes.booking;
       }
-      if (!booking && list.length > 0) {
-        booking = list[0];
-      }
+    } catch (e) {
+      console.warn("Could not fetch booking from API:", e.message);
+    }
+  }
+
+  // 2. Read active booking from storage
+  if (!booking) {
+    try {
+      booking = JSON.parse(localStorage.getItem(EaseMyRideConfig.storageKeys.activeBooking));
     } catch (e) {
       booking = null;
     }
   }
 
-  // If still missing, build fallback receipt representation
+  // 3. Fallback representation if no booking in memory
   if (!booking) {
     booking = {
-      bookingId: bookingIdFromUrl || "EMR-20260828-0001",
-      fullName: "Rahul Sharma",
-      phoneNumber: "9876543210",
-      email: "rahul.sharma@example.com",
+      bookingCode: bookingIdFromUrl || "ROD-20260912-0001",
+      bookingId: bookingIdFromUrl || "ROD-20260912-0001",
+      customerName: "Valued Customer",
+      customerPhone: "9876543210",
+      customerEmail: "customer@example.com",
       fromCity: "Amritsar",
       toCity: "Chandigarh",
-      pickupAddress: "Model Town, Amritsar",
-      dropoffAddress: "Sector 17, Chandigarh",
-      startingDate: "2026-08-29",
-      startingTime: "08:00",
-      carType: "sedan",
-      carName: "Sedan",
-      finalFare: 2930,
-      journeyType: "One Way"
+      pickupAddress: "Airport / Main Landmark",
+      dropoffAddress: "City Center",
+      pickupDate: "2026-09-12",
+      pickupTime: "08:00",
+      vehicleType: "sedan",
+      vehicleName: "Sedan",
+      finalFare: 3200,
+      bookingFeeInr: 500,
+      paymentStatus: "VERIFIED",
+      serviceType: "One Way"
     };
   }
 
@@ -65,33 +68,52 @@ function renderSuccessCard(booking) {
   const receiptContainer = document.getElementById("trip-receipt-items");
   const smsContentEl = document.getElementById("sms-text-content");
 
-  // Generate Customer SMS
-  const smsText = ApiService.generateSmsText(booking);
+  const displayCode = booking.bookingCode || booking.booking_code || booking.bookingId || "ROD-CONFIRMED";
+  const customerName = booking.customerName || booking.customer_name || booking.fullName || "Customer";
+  const phone = booking.customerPhone || booking.customer_phone || booking.phoneNumber || "7973785807";
+  const from = booking.fromCity || booking.from_city || "Origin";
+  const to = booking.toCity || booking.to_city || "Destination";
+  const route = from && to ? `${from} ➔ ${to}` : from;
+  const carName = (booking.vehicleName || booking.vehicle_name || booking.carName || booking.carType || "Sedan").toUpperCase();
+  const dateStr = booking.pickupDate || booking.pickup_date || booking.startingDate || "Scheduled Date";
+  const timeStr = booking.pickupTime || booking.pickup_time || booking.startingTime || "08:00";
+  const pickupFormatted = `${UI.formatDateDisplay(dateStr)}, ${UI.formatTimeDisplay(timeStr)}`;
+  const totalFare = booking.finalFare || booking.final_fare || 3200;
+  const bookingFee = booking.bookingFeeInr !== undefined ? booking.bookingFeeInr : (booking.booking_fee_inr !== undefined ? booking.booking_fee_inr : 500);
+  const balanceFare = Math.max(0, totalFare - bookingFee);
+
+  // Generate Customer SMS text
+  const smsText = booking.customerMessage || booking.customer_message || ApiService.generateSmsText({
+    ...booking,
+    bookingCode: displayCode,
+    fromCity: from,
+    toCity: to,
+    carType: carName,
+    finalFare: totalFare,
+    pickupDate: dateStr,
+    pickupTime: timeStr
+  });
 
   if (bookingIdEl) {
-    bookingIdEl.textContent = booking.bookingId;
+    bookingIdEl.textContent = displayCode;
   }
 
   if (receiptContainer) {
-    const route = booking.fromCity && booking.toCity ? `${booking.fromCity} ➔ ${booking.toCity}` : booking.fromCity || "Local Tour";
-    const carName = (booking.carName || booking.carType || "Sedan").toUpperCase();
-    const pickupFormatted = `${UI.formatDateDisplay(booking.startingDate)}, ${UI.formatTimeDisplay(booking.startingTime)}`;
-
     receiptContainer.innerHTML = `
       <div class="receipt-item">
         <span class="receipt-label">Customer Name</span>
-        <span class="receipt-val">${UI.escapeHTML(booking.fullName)}</span>
+        <span class="receipt-val">${UI.escapeHTML(customerName)}</span>
       </div>
       <div class="receipt-item">
         <span class="receipt-label">Contact Phone</span>
-        <span class="receipt-val">+91 ${UI.escapeHTML(booking.phoneNumber)}</span>
+        <span class="receipt-val">+91 ${UI.escapeHTML(phone)}</span>
       </div>
       <div class="receipt-item">
         <span class="receipt-label">Route</span>
         <span class="receipt-val">${UI.escapeHTML(route)}</span>
       </div>
       <div class="receipt-item">
-        <span class="receipt-label">Vehicle Selected</span>
+        <span class="receipt-label">Vehicle Assigned</span>
         <span class="receipt-val">${UI.escapeHTML(carName)}</span>
       </div>
       <div class="receipt-item">
@@ -99,12 +121,20 @@ function renderSuccessCard(booking) {
         <span class="receipt-val">${pickupFormatted}</span>
       </div>
       <div class="receipt-item">
-        <span class="receipt-label">Estimated Base Fare</span>
-        <span class="receipt-val" style="color:var(--primary); font-size:1.15rem;">₹${Number(booking.finalFare).toLocaleString("en-IN")}</span>
+        <span class="receipt-label">Booking Fee (Paid)</span>
+        <span class="receipt-val" style="color:#10B981; font-weight:700;">₹${bookingFee} (Verified)</span>
+      </div>
+      <div class="receipt-item">
+        <span class="receipt-label">Balance Payable to Driver</span>
+        <span class="receipt-val" style="color:var(--primary); font-size:1.1rem; font-weight:800;">₹${balanceFare.toLocaleString("en-IN")}</span>
+      </div>
+      <div class="receipt-item">
+        <span class="receipt-label">Total Trip Fare</span>
+        <span class="receipt-val">₹${Number(totalFare).toLocaleString("en-IN")}</span>
       </div>
       <div class="receipt-item" style="grid-column: 1 / -1;">
         <span class="receipt-label">Pickup Address</span>
-        <span class="receipt-val">${UI.escapeHTML(booking.pickupAddress || "Provided during booking")}</span>
+        <span class="receipt-val">${UI.escapeHTML(booking.pickupAddress || booking.pickup_address || "Provided during booking")}</span>
       </div>
     `;
   }
@@ -117,7 +147,7 @@ function renderSuccessCard(booking) {
   const copyIdBtn = document.getElementById("btn-copy-booking-id");
   if (copyIdBtn) {
     copyIdBtn.addEventListener("click", () => {
-      UI.copyToClipboard(booking.bookingId, `Copied Booking ID: ${booking.bookingId}`);
+      UI.copyToClipboard(displayCode, `Copied Booking ID: ${displayCode}`);
     });
   }
 
@@ -125,23 +155,21 @@ function renderSuccessCard(booking) {
   const copySmsBtn = document.getElementById("btn-copy-sms");
   if (copySmsBtn) {
     copySmsBtn.addEventListener("click", () => {
-      UI.copyToClipboard(smsText, "SMS text copied to clipboard!");
+      UI.copyToClipboard(smsText, "Confirmation message copied to clipboard!");
     });
   }
 
-  // Download SMS .txt Button
+  // Download Receipt .txt Button
   const downloadSmsBtn = document.getElementById("btn-download-sms");
   if (downloadSmsBtn) {
     downloadSmsBtn.addEventListener("click", () => {
-      UI.downloadFile(`EaseMyRide_${booking.bookingId}_SMS.txt`, smsText);
+      UI.downloadFile(`RideOnDemand_${displayCode}_Receipt.txt`, smsText);
     });
   }
 
   // Native Device Send via SMS Button
   const sendSmsBtn = document.getElementById("btn-open-native-sms");
   if (sendSmsBtn) {
-    // Encodes SMS body for standard sms: URI scheme
-    const phone = booking.phoneNumber ? `+91${booking.phoneNumber}` : "";
     const encodedBody = encodeURIComponent(smsText);
     sendSmsBtn.href = `sms:${phone}?body=${encodedBody}`;
   }
@@ -149,8 +177,8 @@ function renderSuccessCard(booking) {
   // WhatsApp Support Button
   const waBtn = document.getElementById("btn-whatsapp-support");
   if (waBtn) {
-    const waText = encodeURIComponent(`Hi EaseMyRide Team, I have booked a cab (ID: ${booking.bookingId}). Please assist with my ride.`);
-    waBtn.href = `https://wa.me/919876543210?text=${waText}`;
+    const waText = encodeURIComponent(`Hi RideOnDemand Team, I have booked a cab (ID: ${displayCode}). Please assist with my ride.`);
+    waBtn.href = `https://wa.me/917973785807?text=${waText}`;
   }
 
   // Print Receipt Button

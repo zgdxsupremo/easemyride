@@ -1,24 +1,31 @@
 /**
- * EaseMyRide — Public Client Configuration
+ * RideOnDemand — Public Client Configuration
  * Contains non-sensitive configuration, business defaults, vehicle metadata,
  * and routing presets.
  * 
  * IMPORTANT: Secret keys or private credentials MUST NEVER be placed here.
  */
 
-const EaseMyRideConfig = {
+const RideOnDemandConfig = {
   // Brand details
-  companyName: "EaseMyRide",
-  tagline: "Simple rides. Better journeys.",
-  helplineNumber: "+91 98765 43210",
-  whatsappNumber: "+919876543210",
-  supportEmail: "support@easemyride.com",
+  companyName: "RideOnDemand",
+  brandName: "RideOnDemand",
+  tagline: "India's Premier On-Demand Intercity & Airport Cab Service",
+  helplineNumber: "7973785807",
+  whatsappNumber: "+917973785807",
+  supportEmail: "support@rideondemand.com",
   currentYear: 2026,
 
+  // Customer Booking Payment Configuration (₹500 Fee)
+  bookingPaymentUpi: "muskankushwaha787-2@oksbi",
+  bookingConfirmationFee: 500,
+  paymentProvider: "MANUAL_UPI",
+  upiDeepLink: "upi://pay?pa=muskankushwaha787-2@oksbi&pn=RideOnDemand&am=500&cu=INR",
+
+  // API Backend Base URL
+  apiBaseUrl: window.location.port === "4000" ? "/api" : "http://localhost:4000/api",
+
   // Google Apps Script Web App URL
-  // Deploy your Google Apps Script and paste the Web App Exec URL here.
-  // When left as empty string or "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE",
-  // the platform seamlessly operates in Development / Local Simulation Mode.
   appsScriptUrl: "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE",
 
   // Distance & Routing API Configuration
@@ -138,8 +145,9 @@ const EaseMyRideConfig = {
 
 // Export to window object for modular Vanilla JS architecture
 if (typeof window !== "undefined") {
-  window.EaseMyRideConfig = EaseMyRideConfig;
+  window.RideOnDemandConfig = RideOnDemandConfig;
+  window.EaseMyRideConfig = RideOnDemandConfig;
 }
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = EaseMyRideConfig;
+  module.exports = RideOnDemandConfig;
 }

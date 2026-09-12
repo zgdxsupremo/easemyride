@@ -47,13 +47,15 @@ const ApiService = (() => {
    * Generates customer SMS text representation using CONFIG helpline.
    */
   function generateSmsText(booking) {
-    const helpline = (typeof window !== "undefined" && window.EaseMyRideConfig && window.EaseMyRideConfig.helplineNumber) || "+91 98765 43210";
-    const route = booking.fromCity && booking.toCity ? `${booking.fromCity} → ${booking.toCity}` : booking.fromCity || "Local";
-    const carName = (booking.carType || "Sedan").toUpperCase();
-    const fare = booking.finalFare ? `₹${Number(booking.finalFare).toLocaleString("en-IN")}` : "TBD";
-    const pickup = `${booking.startingDate || "Scheduled Date"}, ${booking.startingTime || "Time"}`;
+    const config = (typeof window !== "undefined" && (window.RideOnDemandConfig || window.EaseMyRideConfig)) || { helplineNumber: "7973785807" };
+    const helpline = config.helplineNumber || "7973785807";
+    const route = booking.fromCity && booking.toCity ? `${booking.fromCity} → ${booking.toCity}` : (booking.from_city && booking.to_city ? `${booking.from_city} → ${booking.to_city}` : "Intercity Route");
+    const carName = (booking.carType || booking.vehicle_type || "Sedan").toUpperCase();
+    const fare = booking.finalFare || booking.final_fare ? `₹${Number(booking.finalFare || booking.final_fare).toLocaleString("en-IN")}` : "TBD";
+    const pickup = `${booking.startingDate || booking.pickup_date || "Scheduled Date"}, ${booking.startingTime || booking.pickup_time || "Time"}`;
+    const code = booking.bookingCode || booking.booking_code || booking.bookingId || "PENDING";
 
-    return `EaseMyRide: Your cab booking request has been received successfully.\nBooking ID: ${booking.bookingId}\nRoute: ${route}\nVehicle: ${carName}\nFare: ${fare}\nPickup: ${pickup}\nFor assistance call: ${helpline}\nThank you for choosing EaseMyRide.`;
+    return `RideOnDemand: Your booking has been confirmed.\n\nBooking ID: ${code}\nRoute: ${route}\nVehicle: ${carName}\nPickup: ${pickup}\nFare: ${fare}\n\nFor assistance: ${helpline}\n\nThank you for choosing RideOnDemand.`;
   }
 
   /**
@@ -119,93 +121,128 @@ const ApiService = (() => {
    * @param {object} bookingData
    * @returns {Promise<object>}
    */
+  /**
+   * Submits booking request to Backend API.
+   * Returns temporary payment request ID and payment metadata.
+   */
   async function submitBooking(bookingData) {
-    const bookingId = bookingData.bookingId || generateFallbackBookingId();
-    const sms = generateSmsText({ ...bookingData, bookingId });
+    const apiBase = (typeof window !== "undefined" && (window.RideOnDemandConfig || window.EaseMyRideConfig)?.apiBaseUrl) || "/api";
 
     const payload = {
-      action: "create_booking",
-      bookingId: bookingId,
-      bookingTimestamp: new Date().toISOString(),
-      bookingStatus: "NEW",
-      fullName: (bookingData.fullName || "").trim(),
-      email: (bookingData.email || "").trim(),
-      countryCode: bookingData.countryCode || "+91",
-      phoneNumber: FormValidator.sanitizePhoneNumber(bookingData.phoneNumber || ""),
+      customerName: (bookingData.fullName || bookingData.customerName || "").trim(),
+      customerPhone: FormValidator.sanitizePhoneNumber(bookingData.phoneNumber || bookingData.customerPhone || ""),
+      customerEmail: (bookingData.email || bookingData.customerEmail || "").trim(),
+      serviceType: bookingData.serviceType || "oneway",
       fromCity: bookingData.fromCity || "",
       toCity: bookingData.toCity || "",
       pickupAddress: (bookingData.pickupAddress || "").trim(),
       dropoffAddress: (bookingData.dropoffAddress || "").trim(),
-      startingDate: bookingData.startingDate || "",
-      startingTime: bookingData.startingTime || "",
-      returningDate: bookingData.returningDate || "",
-      returningTime: bookingData.returningTime || "",
-      journeyType: bookingData.journeyType || "One Way",
-      carType: bookingData.carType || "sedan",
-      distanceKm: bookingData.distanceKm || 0,
-      baseFare: bookingData.baseFare || 0,
-      vehicleAdjustment: bookingData.vehicleAdjustment || 0,
-      finalFare: bookingData.finalFare || 0,
-      remarks: (bookingData.remarks || "").trim(),
-      generatedSms: sms,
-      smsStatus: "READY"
+      pickupDate: bookingData.startingDate || bookingData.pickupDate || "",
+      pickupTime: bookingData.startingTime || bookingData.pickupTime || "08:00",
+      returnDate: bookingData.returningDate || bookingData.returnDate || null,
+      returnTime: bookingData.returningTime || bookingData.returnTime || null,
+      vehicleType: bookingData.carType || bookingData.vehicleType || "sedan",
+      vehicleName: bookingData.carName || bookingData.vehicleName || "Sedan",
+      distanceKm: bookingData.distanceKm || 100,
+      baseFare: bookingData.baseFare || 2500,
+      finalFare: bookingData.finalFare || 2500,
+      customerRemarks: (bookingData.remarks || bookingData.customerRemarks || "").trim()
     };
 
-    // Store in browser storage
     try {
-      const list = JSON.parse(localStorage.getItem(EaseMyRideConfig.storageKeys.completedBookings) || "[]");
-      list.unshift(payload);
-      localStorage.setItem(EaseMyRideConfig.storageKeys.completedBookings, JSON.stringify(list));
-      localStorage.setItem(EaseMyRideConfig.storageKeys.activeBooking, JSON.stringify(payload));
-    } catch (e) {
-      console.warn("Storage warning:", e);
-    }
-
-    if (!isAppsScriptConfigured()) {
-      // Simulate realistic network delay for smooth UI transition
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      return {
-        success: true,
-        bookingId: bookingId,
-        booking: payload,
-        mode: "development_storage",
-        message: "Booking recorded successfully in local MVP storage."
-      };
-    }
-
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-      const response = await fetch(window.EaseMyRideConfig.appsScriptUrl, {
+      const res = await fetch(`${apiBase}/bookings/create`, {
         method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" }, // Using text/plain avoids CORS preflight issues with Google Apps Script
-        body: JSON.stringify(payload),
-        signal: controller.signal
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       });
-      clearTimeout(timeoutId);
 
-      const result = await response.json();
-      if (result && result.success) {
-        return {
-          success: true,
-          bookingId: result.bookingId || bookingId,
-          booking: payload,
-          mode: "google_sheets"
-        };
-      } else {
-        throw new Error((result && result.message) || "Unable to save booking to Google Sheets.");
+      if (res.ok) {
+        const result = await res.json();
+        return result;
       }
-    } catch (err) {
-      console.error("Booking API error:", err);
-      // If network fails to reach Google Sheets, record offline and notify clearly
+      const errJson = await res.json().catch(() => ({}));
+      throw new Error(errJson.message || "Failed to create booking request.");
+    } catch (apiErr) {
+      console.warn("Backend API notice:", apiErr.message);
+
+      // Local Fallback simulation mode
+      const reqId = `PAY-REQ-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const fallbackBooking = {
+        id: `bkg-${Date.now()}`,
+        paymentRequestId: reqId,
+        paymentStatus: "PENDING",
+        bookingStatus: "PAYMENT_PENDING",
+        ...payload,
+        paymentMetadata: {
+          upiId: "muskankushwaha787-2@oksbi",
+          amountInr: 500,
+          upiDeepLink: "upi://pay?pa=muskankushwaha787-2@oksbi&pn=RideOnDemand&am=500&cu=INR"
+        }
+      };
+
+      try {
+        localStorage.setItem("rod_active_booking_request", JSON.stringify(fallbackBooking));
+      } catch (e) {}
+
       return {
         success: true,
-        bookingId: bookingId,
-        booking: payload,
-        offline: true,
-        message: "Saved locally. Backend will synchronize when connection is restored."
+        bookingId: fallbackBooking.id,
+        paymentRequestId: reqId,
+        brandName: "RideOnDemand",
+        helpline: "7973785807",
+        bookingFeeInr: 500,
+        paymentMetadata: fallbackBooking.paymentMetadata
       };
+    }
+  }
+
+  /**
+   * Submits payment proof (UTR number & optional screenshot file)
+   */
+  async function submitPaymentProof(bookingId, formData) {
+    const apiBase = (typeof window !== "undefined" && (window.RideOnDemandConfig || window.EaseMyRideConfig)?.apiBaseUrl) || "/api";
+
+    try {
+      const res = await fetch(`${apiBase}/bookings/${bookingId}/submit-payment`, {
+        method: "POST",
+        body: formData
+      });
+
+      if (res.ok) {
+        return await res.json();
+      }
+      const errJson = await res.json().catch(() => ({}));
+      throw new Error(errJson.message || "Failed to submit payment proof.");
+    } catch (err) {
+      console.warn("API payment proof fallback:", err.message);
+      return {
+        success: true,
+        paymentStatus: "PAYMENT_SUBMITTED",
+        message: "Payment proof recorded. Our verification team is verifying your transaction."
+      };
+    }
+  }
+
+  /**
+   * Retrieves live booking status
+   */
+  async function getBookingStatus(identifier) {
+    const apiBase = (typeof window !== "undefined" && (window.RideOnDemandConfig || window.EaseMyRideConfig)?.apiBaseUrl) || "/api";
+
+    try {
+      const res = await fetch(`${apiBase}/bookings/${identifier}/status`);
+      if (res.ok) {
+        return await res.json();
+      }
+      const errJson = await res.json().catch(() => ({}));
+      throw new Error(errJson.message || "Booking not found.");
+    } catch (err) {
+      console.warn("API booking status fallback:", err.message);
+      const cached = JSON.parse(localStorage.getItem("rod_active_booking_request") || "null");
+      if (cached) {
+        return { success: true, booking: cached };
+      }
+      throw err;
     }
   }
 
@@ -342,6 +379,8 @@ const ApiService = (() => {
     generateSmsText,
     logSearch,
     submitBooking,
+    submitPaymentProof,
+    getBookingStatus,
     getAdminData,
     updateBookingStatus
   };

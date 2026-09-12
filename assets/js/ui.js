@@ -255,18 +255,21 @@ const UI = (() => {
    * @param {string} activePage
    */
   function injectNavigation(activePage = "home") {
+    const config = window.RideOnDemandConfig || window.EaseMyRideConfig || { helplineNumber: "7973785807" };
+    const helpline = config.helplineNumber || "7973785807";
+
     const headerEl = document.getElementById("site-header");
     if (headerEl) {
       headerEl.innerHTML = `
         <div class="container nav-container">
-          <a href="index.html" class="brand-logo" aria-label="EaseMyRide Home">
+          <a href="index.html" class="brand-logo" aria-label="RideOnDemand Home">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2"/>
               <circle cx="7" cy="17" r="2"/>
               <path d="M9 17h6"/>
               <circle cx="17" cy="17" r="2"/>
             </svg>
-            <span>Ease<span class="highlight">My</span>Ride</span>
+            <span>Ride<span class="highlight">On</span>Demand</span>
           </a>
 
           <ul class="nav-links">
@@ -280,11 +283,11 @@ const UI = (() => {
           </ul>
 
           <div class="nav-actions">
-            <a href="tel:+919876543210" class="nav-helpline" title="24/7 Helpline">
+            <a href="tel:${helpline}" class="nav-helpline" title="24/7 Helpline">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
               </svg>
-              <span>+91 98765 43210</span>
+              <span>${helpline}</span>
             </a>
             <a href="index.html#booking-widget" class="btn btn-primary btn-sm">Book a Cab</a>
             <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Toggle Menu">
@@ -311,16 +314,16 @@ const UI = (() => {
         <div class="footer-top">
           <div class="container footer-grid">
             <div class="footer-brand">
-              <div class="footer-logo">Ease<span class="highlight" style="color:var(--accent);">My</span>Ride</div>
-              <p class="footer-tagline">Simple rides. Better journeys. Verified drivers, transparent fares and seamless intercity travel across India.</p>
+              <div class="footer-logo">Ride<span class="highlight" style="color:var(--accent);">On</span>Demand</div>
+              <p class="footer-tagline">India's Premier On-Demand Intercity & Airport Cab Service. Verified chauffeurs, transparent fares, and 24/7 dedicated helpline support.</p>
               <div class="footer-contact-info">
                 <div class="footer-contact-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                  <span>24/7 Helpline: <strong>+91 98765 43210</strong></span>
+                  <span>24/7 Helpline: <strong>${helpline}</strong></span>
                 </div>
                 <div class="footer-contact-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                  <span>Email: support@easemyride.com</span>
+                  <span>Email: support@rideondemand.com</span>
                 </div>
               </div>
             </div>
@@ -356,7 +359,7 @@ const UI = (() => {
         </div>
         <div class="footer-bottom">
           <div class="container footer-bottom-flex">
-            <p>© 2026 EaseMyRide. All rights reserved. Built for seamless travel.</p>
+            <p>© 2026 RideOnDemand. All rights reserved. Built for seamless travel.</p>
             <p style="font-size:0.8rem; color:var(--gray-500);">Tolls, parking & applicable taxes extra as per actuals.</p>
           </div>
         </div>
@@ -371,7 +374,7 @@ const UI = (() => {
       drawer.innerHTML = `
         <div class="mobile-nav-header">
           <div class="brand-logo">
-            <span>Ease<span class="highlight">My</span>Ride</span>
+            <span>Ride<span class="highlight">On</span>Demand</span>
           </div>
           <button class="modal-close-btn" id="close-drawer-btn" aria-label="Close Navigation">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -387,7 +390,7 @@ const UI = (() => {
           <li><a href="contact.html">Contact</a></li>
         </ul>
         <div class="mobile-nav-footer">
-          <a href="tel:+919876543210" class="btn btn-outline btn-block">📞 Call +91 98765 43210</a>
+          <a href="tel:${helpline}" class="btn btn-outline btn-block">📞 Call ${helpline}</a>
           <a href="index.html#booking-widget" class="btn btn-primary btn-block">Book a Cab</a>
         </div>
       `;

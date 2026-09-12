@@ -195,21 +195,45 @@ function initBookingForm(bookingData) {
         remarks: remarks
       };
 
-      UI.showLoading("Submitting your booking request securely...");
+      UI.showLoading("Creating your booking request securely...");
 
       try {
         const result = await ApiService.submitBooking(finalBookingPayload);
 
+        UI.hideLoading();
+
         if (result && result.success) {
-          UI.hideLoading();
-          // Store completed booking object for success screen
-          localStorage.setItem(EaseMyRideConfig.storageKeys.activeBooking, JSON.stringify(result.booking));
-          window.location.href = `success.html?id=${result.bookingId}`;
+          const bookingId = result.bookingId;
+          const paymentRequestId = result.paymentRequestId;
+          const paymentMeta = result.paymentMetadata || {};
+
+          // Store current booking context
+          sessionStorage.setItem("rod_active_booking_id", bookingId);
+          sessionStorage.setItem("rod_active_request_id", paymentRequestId);
+
+          // Transition UI to Step 2: Payment Screen
+          document.getElementById("booking-step-details").style.display = "none";
+          const paymentStep = document.getElementById("booking-step-payment");
+          paymentStep.style.display = "block";
+          window.scrollTo({ top: 0, behavior: "smooth" });
+
+          // Populate Payment details
+          document.getElementById("payment-req-id-display").textContent = paymentRequestId;
+          const upiId = paymentMeta.upiId || "muskankushwaha787-2@oksbi";
+          document.getElementById("upi-id-text").textContent = upiId;
+          document.getElementById("upi-id-bold").textContent = upiId;
+          
+          const deepLinkEl = document.getElementById("btn-upi-deeplink");
+          if (deepLinkEl && paymentMeta.upiDeepLink) {
+            deepLinkEl.href = paymentMeta.upiDeepLink;
+          }
+
+          // Initialize Payment Proof Submit Handler
+          initPaymentProofHandler(bookingId, paymentRequestId);
         } else {
-          UI.hideLoading();
           UI.showToast(
             "Booking Notice",
-            "We couldn't confirm your booking right now. Please try again or contact support.",
+            (result && result.message) || "We couldn't initialize your booking request. Please try again or contact support at 7973785807.",
             "error"
           );
         }
@@ -218,12 +242,144 @@ function initBookingForm(bookingData) {
         console.error("Booking error:", err);
         UI.showToast(
           "Booking Notice",
-          "We couldn't confirm your booking right now. Please try again or contact support at +91 98765 43210.",
+          "We couldn't initialize your booking request. Please try again or contact support at 7973785807.",
           "error"
         );
       }
     });
   }
+
+  // Copy UPI ID Button Handler
+  const copyUpiBtn = document.getElementById("btn-copy-upi");
+  if (copyUpiBtn) {
+    copyUpiBtn.addEventListener("click", () => {
+      const upiText = document.getElementById("upi-id-text")?.textContent || "muskankushwaha787-2@oksbi";
+      navigator.clipboard.writeText(upiText).then(() => {
+        UI.showToast("Copied!", `UPI ID ${upiText} copied to clipboard.`, "success");
+      }).catch(() => {
+        UI.showToast("UPI ID", upiText, "info");
+      });
+    });
+  }
+}
+
+/**
+ * Initializes the UTR / Payment Proof submission handler and live status tracker
+ */
+function initPaymentProofHandler(bookingId, paymentRequestId) {
+  const proofForm = document.getElementById("payment-proof-form");
+  const utrInput = document.getElementById("payment-utr");
+  const screenshotInput = document.getElementById("payment-screenshot");
+  const utrError = document.getElementById("utr-error");
+
+  if (!proofForm) return;
+
+  proofForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const utr = utrInput ? utrInput.value.trim() : "";
+    if (!utr || utr.length < 6) {
+      if (utrError) utrError.textContent = "Please enter a valid 12-digit UTR / transaction reference number (min 6 characters).";
+      if (utrInput) utrInput.classList.add("is-invalid");
+      return;
+    }
+
+    if (utrInput) utrInput.classList.remove("is-invalid");
+    if (utrError) utrError.textContent = "";
+
+    const formData = new FormData();
+    formData.append("utrNumber", utr);
+    formData.append("paymentAmount", 500);
+    formData.append("paymentTimestamp", new Date().toISOString());
+
+    if (screenshotInput && screenshotInput.files && screenshotInput.files[0]) {
+      formData.append("screenshot", screenshotInput.files[0]);
+    }
+
+    UI.showLoading("Submitting payment proof for verification...");
+
+    try {
+      const proofResult = await ApiService.submitPaymentProof(bookingId, formData);
+      UI.hideLoading();
+
+      if (proofResult && proofResult.success) {
+        // Transition UI to Step 3: Tracker Screen
+        document.getElementById("booking-step-payment").style.display = "none";
+        const trackerStep = document.getElementById("booking-step-tracker");
+        trackerStep.style.display = "block";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+        document.getElementById("tracker-req-id").textContent = paymentRequestId;
+        document.getElementById("tracker-utr").textContent = utr;
+
+        UI.showToast("Proof Received", "Your ₹500 payment confirmation is under review. Polling verification status...", "success");
+
+        // Start polling for verification every 4 seconds
+        startStatusPolling(bookingId, paymentRequestId);
+      } else {
+        UI.showToast("Notice", (proofResult && proofResult.message) || "Unable to submit proof. Please try again.", "error");
+      }
+    } catch (err) {
+      UI.hideLoading();
+      console.error("Proof submission error:", err);
+      UI.showToast("Notice", "Unable to submit proof. Please try again or contact helpline 7973785807.", "error");
+    }
+  });
+
+  // Check status button
+  const checkStatusBtn = document.getElementById("btn-check-status");
+  if (checkStatusBtn) {
+    checkStatusBtn.addEventListener("click", async () => {
+      UI.showLoading("Checking live payment verification...");
+      try {
+        const statusRes = await ApiService.getBookingStatus(bookingId);
+        UI.hideLoading();
+        if (statusRes && statusRes.booking && statusRes.booking.payment_status === "VERIFIED") {
+          const finalCode = statusRes.booking.booking_code || bookingId;
+          UI.showToast("Payment Verified!", `Booking confirmed with ID: ${finalCode}`, "success");
+          setTimeout(() => {
+            window.location.href = `success.html?id=${finalCode}`;
+          }, 1000);
+        } else if (statusRes && statusRes.booking && statusRes.booking.payment_status === "REJECTED") {
+          UI.showToast("Payment Notice", `Verification was not approved: ${statusRes.booking.payment_rejection_reason || "Invalid reference"}. Please contact support.`, "error");
+        } else {
+          UI.showToast("Under Review", "Your ₹500 payment is currently being reviewed by our operations desk.", "info");
+        }
+      } catch (e) {
+        UI.hideLoading();
+        UI.showToast("Status Checked", "Verification is still in progress. Please hold on.", "info");
+      }
+    });
+  }
+}
+
+/**
+ * Polls backend periodically to check if admin verified payment
+ */
+let pollingInterval = null;
+function startStatusPolling(bookingId, paymentRequestId) {
+  if (pollingInterval) clearInterval(pollingInterval);
+
+  pollingInterval = setInterval(async () => {
+    try {
+      const statusRes = await ApiService.getBookingStatus(bookingId);
+      if (statusRes && statusRes.booking) {
+        if (statusRes.booking.payment_status === "VERIFIED") {
+          clearInterval(pollingInterval);
+          const finalCode = statusRes.booking.booking_code || bookingId;
+          UI.showToast("Booking Confirmed!", `Your Booking ID ${finalCode} is ready!`, "success");
+          setTimeout(() => {
+            window.location.href = `success.html?id=${finalCode}`;
+          }, 1200);
+        } else if (statusRes.booking.payment_status === "REJECTED") {
+          clearInterval(pollingInterval);
+          UI.showToast("Payment Rejected", statusRes.booking.payment_rejection_reason || "Payment proof could not be verified.", "error");
+        }
+      }
+    } catch (e) {
+      // Quiet background retry
+    }
+  }, 4000);
 }
 
 /**
@@ -233,7 +389,9 @@ function renderTripSidebar(bookingData) {
   const container = document.getElementById("trip-summary-sidebar-container");
   if (!container) return;
 
-  const vehMeta = EaseMyRideConfig.vehicles.find((v) => v.id === bookingData.carType) || EaseMyRideConfig.vehicles[1];
+  const config = window.RideOnDemandConfig || window.EaseMyRideConfig || { vehicles: [] };
+  const vehList = config.vehicles || [];
+  const vehMeta = vehList.find((v) => v.id === bookingData.carType) || vehList[1] || { name: "Sedan", category: "Comfortable Intercity" };
 
   container.innerHTML = `
     <div class="trip-summary-sidebar">
@@ -252,33 +410,27 @@ function renderTripSidebar(bookingData) {
 
       <div class="fare-breakdown-list">
         <div class="fare-breakdown-row">
-          <span>Base Sedan Rate</span>
-          <span>₹${(bookingData.baseFare || bookingData.finalFare).toLocaleString("en-IN")}</span>
-        </div>
-        ${
-          bookingData.vehicleAdjustment !== 0
-            ? `
-          <div class="fare-breakdown-row">
-            <span>${vehMeta.name} Adjustment</span>
-            <span>${bookingData.vehicleAdjustment > 0 ? `+ ₹${bookingData.vehicleAdjustment.toLocaleString("en-IN")}` : `- ₹${Math.abs(bookingData.vehicleAdjustment)}`}</span>
-          </div>
-        `
-            : ""
-        }
-        <div class="fare-breakdown-row total">
-          <span>Estimated Base Fare</span>
+          <span>Estimated Total Fare</span>
           <span>₹${Number(bookingData.finalFare).toLocaleString("en-IN")}</span>
+        </div>
+        <div class="fare-breakdown-row" style="color:var(--primary); font-weight:700;">
+          <span>Confirmation Fee Payable Now</span>
+          <span>₹500</span>
+        </div>
+        <div class="fare-breakdown-row">
+          <span>Balance Payable to Chauffeur</span>
+          <span>₹${Math.max(0, Number(bookingData.finalFare) - 500).toLocaleString("en-IN")}</span>
         </div>
       </div>
 
       <div class="transparent-note">
-        <strong>Fare Policy:</strong><br>
-        Tolls, interstate permits, and parking charges are not included in base fare and are payable directly as per actual trip receipts.
+        <strong>Payment Policy:</strong><br>
+        A ₹500 booking fee confirms your cab assignment and locks the price. Balance fare is paid directly upon travel. Tolls & state permits extra per actuals.
       </div>
 
       <div style="font-size:0.85rem; color:var(--gray-500); display:flex; align-items:center; gap:0.4rem;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span>No advance payment needed to book.</span>
+        <span>Helpline: <strong>7973785807</strong> (24/7 Support)</span>
       </div>
     </div>
   `;
