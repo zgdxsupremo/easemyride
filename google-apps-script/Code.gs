@@ -1,5 +1,5 @@
 /**
- * EaseMyRide — Google Apps Script Backend API (Code.gs)
+ * RideOnDemand — Google Apps Script Backend API (Code.gs)
  * 
  * Functions as the serverless API and database engine connected to Google Sheets.
  * 
@@ -15,7 +15,7 @@ var SHEET_BOOKINGS = "BOOKINGS";
 var SHEET_CONFIG = "CONFIG";
 
 /**
- * Handles all incoming POST requests from the EaseMyRide web client.
+ * Handles all incoming POST requests from the RideOnDemand web client.
  */
 function doPost(e) {
   try {
@@ -49,7 +49,7 @@ function doGet(e) {
     } else if (action === "get_config") {
       return handleGetConfig();
     } else {
-      return createJsonResponse({ success: true, message: "EaseMyRide Apps Script API is operational." });
+      return createJsonResponse({ success: true, message: "RideOnDemand Apps Script API is operational." });
     }
   } catch (err) {
     return createJsonResponse({ success: false, message: "GET error: " + err.toString() }, 500);
@@ -137,14 +137,14 @@ function handleCreateBooking(data) {
   // 3. Generate Customer SMS Text
   var helpline = config.helplineNumber || "+91 98765 43210";
   var route = (data.fromCity && data.toCity) ? (data.fromCity + " → " + data.toCity) : (data.fromCity || "Local");
-  var generatedSms = "EaseMyRide: Your cab booking request has been received successfully.\n" +
+  var generatedSms = "RideOnDemand: Your cab booking request has been received successfully.\n" +
     "Booking ID: " + bookingId + "\n" +
     "Route: " + route + "\n" +
     "Vehicle: " + (data.carName || carType).toUpperCase() + "\n" +
     "Fare: ₹" + verifiedFinalFare.toLocaleString("en-IN") + "\n" +
     "Pickup: " + (data.startingDate || "Scheduled Date") + ", " + (data.startingTime || "Time") + "\n" +
     "For assistance call: " + helpline + "\n" +
-    "Thank you for choosing EaseMyRide.";
+    "Thank you for choosing RideOnDemand.";
 
   var bookingTimestamp = now.toISOString();
 
@@ -194,8 +194,8 @@ function handleCreateBooking(data) {
   try {
     var adminEmail = Session.getEffectiveUser().getEmail() || (config && config.adminEmail);
     if (adminEmail) {
-      var emailSubject = "🚗 New EaseMyRide Booking Alert [" + bookingId + "] — " + route;
-      var emailBody = "Hello Admin,\n\nA new cab booking request has been submitted on EaseMyRide!\n\n" +
+      var emailSubject = "🚗 New RideOnDemand Booking Alert [" + bookingId + "] — " + route;
+      var emailBody = "Hello Admin,\n\nA new cab booking request has been submitted on RideOnDemand!\n\n" +
         "• Booking ID: " + bookingId + "\n" +
         "• Customer Name: " + (data.fullName || "N/A") + "\n" +
         "• Phone Number: +91 " + (data.phoneNumber || "N/A") + "\n" +
@@ -206,7 +206,7 @@ function handleCreateBooking(data) {
         "• Pickup Schedule: " + (data.startingDate || "Date") + " at " + (data.startingTime || "Time") + "\n" +
         "• Pickup Address: " + (data.pickupAddress || "N/A") + "\n" +
         "• Remarks: " + (data.remarks || "None") + "\n\n" +
-        "👉 Open your Google Sheet or EaseMyRide Admin Portal to assign a driver and update status.\n";
+        "👉 Open your Google Sheet or RideOnDemand Admin Portal to assign a driver and update status.\n";
       
       MailApp.sendEmail(adminEmail, emailSubject, emailBody);
     }
@@ -349,7 +349,7 @@ function readBusinessConfig(ss) {
     crystaAdjustment: 4000,
     hatchbackAdjustment: -100,
     minimumFare: 800,
-    companyName: "EaseMyRide"
+    companyName: "RideOnDemand"
   };
 
   var values = sheet.getDataRange().getValues();
@@ -364,7 +364,7 @@ function readBusinessConfig(ss) {
       ["Crysta Adjustment", "4000", "Price added over Sedan for Innova Crysta"],
       ["Hatchback Adjustment", "-100", "Discount compared to Sedan"],
       ["Minimum Fare", "800", "Floor minimum charge for any intercity booking"],
-      ["Company Name", "EaseMyRide", "Brand identifier"]
+      ["Company Name", "RideOnDemand", "Brand identifier"]
     ];
     sheet.getRange(2, 1, seed.length, 3).setValues(seed);
     return config;
@@ -415,7 +415,7 @@ function initializeDatabase() {
   formatHeaders(cSheet, "#FF9F1C");
   readBusinessConfig(ss); // Seed defaults
 
-  Logger.log("✅ EaseMyRide Database initialized successfully!");
+  Logger.log("✅ RideOnDemand Database initialized successfully!");
 }
 
 /**

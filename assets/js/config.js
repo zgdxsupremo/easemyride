@@ -146,7 +146,7 @@ const RideOnDemandConfig = {
 // Export to window object for modular Vanilla JS architecture
 if (typeof window !== "undefined") {
   window.RideOnDemandConfig = RideOnDemandConfig;
-  window.EaseMyRideConfig = RideOnDemandConfig;
+  window.RideOnDemandConfig = RideOnDemandConfig;
 }
 if (typeof module !== "undefined" && module.exports) {
   module.exports = RideOnDemandConfig;

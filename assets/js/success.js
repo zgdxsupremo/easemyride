@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 2. Read active booking from storage
   if (!booking) {
     try {
-      booking = JSON.parse(localStorage.getItem(EaseMyRideConfig.storageKeys.activeBooking));
+      booking = JSON.parse(localStorage.getItem(RideOnDemandConfig.storageKeys.activeBooking));
     } catch (e) {
       booking = null;
     }

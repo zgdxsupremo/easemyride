@@ -33,7 +33,7 @@
 ## 📂 Project Structure
 
 ```
-easemyride/
+RideOnDemand/
 ├── index.html                  # High-converting Homepage with 4-tab booking search widget
 ├── search.html                 # Vehicle selection & transparent fare breakdown page
 ├── booking.html                # Booking checkout & passenger information form
@@ -77,19 +77,19 @@ easemyride/
 
 ## 🚀 How to Run Locally
 
-Because EaseMyRide is built with pure Vanilla web technologies, no build step or package installation (`npm install`) is required.
+Because RideOnDemand is built with pure Vanilla web technologies, no build step or package installation (`npm install`) is required.
 
 ### Method 1: Using Python's Built-in Web Server
 Open PowerShell in the project directory:
 ```powershell
-cd C:\Users\om\.gemini\antigravity\scratch\easemyride
+cd C:\Users\om\.gemini\antigravity\scratch\RideOnDemand
 python -m http.server 8000
 ```
 Open your browser at `http://localhost:8000`.
 
 ### Method 2: Using Node.js `npx serve` or `http-server`
 ```powershell
-cd C:\Users\om\.gemini\antigravity\scratch\easemyride
+cd C:\Users\om\.gemini\antigravity\scratch\RideOnDemand
 npx serve .
 ```
 
@@ -103,7 +103,7 @@ You can also open `index.html` directly in any modern browser (Chrome, Edge, Fir
 Deploy to any static hosting provider within seconds:
 
 ### Deploy to Cloudflare Pages / Vercel / Netlify / GitHub Pages:
-1. Push the `/easemyride` repository to GitHub or upload the folder directly.
+1. Push the `/RideOnDemand` repository to GitHub or upload the folder directly.
 2. Set the publish directory to the root `/` (no build command needed).
 3. Connect your custom domain (e.g. `https://rideondemand.com`).
 
@@ -111,12 +111,12 @@ Deploy to any static hosting provider within seconds:
 
 ## 🗄️ Google Sheets & Backend Setup
 
-Read the detailed guide in [`google-apps-script/setup-guide.md`](file:///C:/Users/om/.gemini/antigravity/scratch/easemyride/google-apps-script/setup-guide.md).
+Read the detailed guide in [`google-apps-script/setup-guide.md`](file:///C:/Users/om/.gemini/antigravity/scratch/RideOnDemand/google-apps-script/setup-guide.md).
 
 ### Quick Summary:
 1. Create a new Google Sheet at [sheets.new](https://sheets.new).
 2. Go to **Extensions** > **Apps Script**.
-3. Copy and paste all code from [`google-apps-script/Code.gs`](file:///C:/Users/om/.gemini/antigravity/scratch/easemyride/google-apps-script/Code.gs).
+3. Copy and paste all code from [`google-apps-script/Code.gs`](file:///C:/Users/om/.gemini/antigravity/scratch/RideOnDemand/google-apps-script/Code.gs).
 4. Run the **`initializeDatabase`** function once to automatically create and style the `SEARCHES`, `BOOKINGS`, and `CONFIG` sheets.
 5. Click **Deploy** > **New Deployment** > Select **Web app** (`Execute as: Me`, `Who has access: Anyone`).
 6. Copy the Web App URL and paste it into `assets/js/config.js` under `appsScriptUrl`.
@@ -223,4 +223,4 @@ function sendSMS(phoneNumber, message) {
 
 ---
 
-© 2026 **EaseMyRide**. All rights reserved. Built for seamless travel across India.
+© 2026 **RideOnDemand**. All rights reserved. Built for seamless travel across India.

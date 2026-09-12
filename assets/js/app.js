@@ -1,5 +1,5 @@
 /**
- * EaseMyRide — Homepage Controller (app.js)
+ * RideOnDemand — Homepage Controller (app.js)
  * 
  * Manages the multi-tab booking search widget, dynamic fields per service,
  * date restrictions, autocomplete location hints, and search submission.
@@ -217,7 +217,7 @@ document.addEventListener("DOMContentLoaded", () => {
         let destCity = dropVal;
 
         if (currentService === "airport") {
-          const selectedAirport = EaseMyRideConfig.airports.find((a) => a.id === airportId) || EaseMyRideConfig.airports[0];
+          const selectedAirport = RideOnDemandConfig.airports.find((a) => a.id === airportId) || RideOnDemandConfig.airports[0];
           originCity = transferType === "airport_to_city" ? selectedAirport.name : pickupVal;
           destCity = transferType === "airport_to_city" ? pickupVal : selectedAirport.name;
           distanceData = await DistanceService.calculateDistance(originCity, destCity, "airport");
@@ -262,7 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ApiService.logSearch(searchPayload);
 
         // 2. Save active search state in localStorage
-        localStorage.setItem(EaseMyRideConfig.storageKeys.lastSearch, JSON.stringify(searchPayload));
+        localStorage.setItem(RideOnDemandConfig.storageKeys.lastSearch, JSON.stringify(searchPayload));
 
         // 3. Build URL query params for sharing / bookmarking search results
         const params = new URLSearchParams({
@@ -301,9 +301,9 @@ document.addEventListener("DOMContentLoaded", () => {
    */
   function renderPopularRoutes() {
     const grid = document.getElementById("popular-routes-grid");
-    if (!grid || !EaseMyRideConfig.popularRoutes) return;
+    if (!grid || !RideOnDemandConfig.popularRoutes) return;
 
-    grid.innerHTML = EaseMyRideConfig.popularRoutes
+    grid.innerHTML = RideOnDemandConfig.popularRoutes
       .map((r) => {
         return `
           <div class="route-card" data-from="${r.from}" data-to="${r.to}">

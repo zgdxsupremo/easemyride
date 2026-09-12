@@ -1,5 +1,5 @@
 /**
- * EaseMyRide — Reusable UI Components & Helpers
+ * RideOnDemand — Reusable UI Components & Helpers
  * 
  * Provides interactive modals, toast notifications, accordion controllers,
  * mobile drawer management, clipboard helpers, and formatters.
@@ -255,7 +255,7 @@ const UI = (() => {
    * @param {string} activePage
    */
   function injectNavigation(activePage = "home") {
-    const config = window.RideOnDemandConfig || window.EaseMyRideConfig || { helplineNumber: "7973785807" };
+    const config = window.RideOnDemandConfig || window.RideOnDemandConfig || { helplineNumber: "7973785807" };
     const helpline = config.helplineNumber || "7973785807";
 
     const headerEl = document.getElementById("site-header");

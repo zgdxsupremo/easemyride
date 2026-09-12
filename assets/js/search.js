@@ -1,5 +1,5 @@
 /**
- * EaseMyRide — Vehicle Search Results Controller (search.js)
+ * RideOnDemand — Vehicle Search Results Controller (search.js)
  * 
  * Reads search criteria, executes PricingEngine computations, renders dynamic
  * vehicle cards with capacities and transparent pricing, and manages vehicle selection.
@@ -31,7 +31,7 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     // Fallback to local storage
     try {
-      searchData = JSON.parse(localStorage.getItem(EaseMyRideConfig.storageKeys.lastSearch));
+      searchData = JSON.parse(localStorage.getItem(RideOnDemandConfig.storageKeys.lastSearch));
     } catch (e) {
       searchData = null;
     }
@@ -118,7 +118,7 @@ function renderVehicleResults(searchData) {
 
   const vehicleFares = PricingEngine.getAllVehicleFares(searchData);
 
-  container.innerHTML = EaseMyRideConfig.vehicles
+  container.innerHTML = RideOnDemandConfig.vehicles
     .map((veh) => {
       const quote = vehicleFares.find((f) => f.carType === veh.id) || vehicleFares[1];
       const fareAmount = quote ? quote.finalFare : 3000;
@@ -223,7 +223,7 @@ function renderVehicleResults(searchData) {
         selectedAt: new Date().toISOString()
       };
 
-      localStorage.setItem(EaseMyRideConfig.storageKeys.activeBooking, JSON.stringify(bookingIntent));
+      localStorage.setItem(RideOnDemandConfig.storageKeys.activeBooking, JSON.stringify(bookingIntent));
 
       // Build Booking checkout URL
       const params = new URLSearchParams({
@@ -347,7 +347,7 @@ function setupModifySearchModal(currentData) {
           duration: distData.duration
         };
 
-        localStorage.setItem(EaseMyRideConfig.storageKeys.lastSearch, JSON.stringify(updated));
+        localStorage.setItem(RideOnDemandConfig.storageKeys.lastSearch, JSON.stringify(updated));
         renderRouteSummary(updated);
         renderVehicleResults(updated);
         UI.hideLoading();

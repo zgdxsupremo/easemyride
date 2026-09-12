@@ -1,5 +1,5 @@
 /**
- * EaseMyRide — Booking Checkout Controller (booking.js)
+ * RideOnDemand — Booking Checkout Controller (booking.js)
  * 
  * Manages passenger details collection, journey address specifications,
  * trip summary verification, robust validation, and Apps Script submission.
@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Read active booking state from localStorage or query params
   let bookingData = null;
   try {
-    bookingData = JSON.parse(localStorage.getItem(EaseMyRideConfig.storageKeys.activeBooking));
+    bookingData = JSON.parse(localStorage.getItem(RideOnDemandConfig.storageKeys.activeBooking));
   } catch (e) {
     bookingData = null;
   }
@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
       phoneNumber: urlParams.get("phone") || "",
       distanceKm: dist,
       carType: car,
-      carName: (EaseMyRideConfig.vehicles.find((v) => v.id === car) || { name: "Sedan" }).name,
+      carName: (RideOnDemandConfig.vehicles.find((v) => v.id === car) || { name: "Sedan" }).name,
       finalFare: parseInt(urlParams.get("fare"), 10) || quote.finalFare,
       baseFare: quote.baseFareSedan,
       vehicleAdjustment: quote.vehicleAdjustment
@@ -389,7 +389,7 @@ function renderTripSidebar(bookingData) {
   const container = document.getElementById("trip-summary-sidebar-container");
   if (!container) return;
 
-  const config = window.RideOnDemandConfig || window.EaseMyRideConfig || { vehicles: [] };
+  const config = window.RideOnDemandConfig || window.RideOnDemandConfig || { vehicles: [] };
   const vehList = config.vehicles || [];
   const vehMeta = vehList.find((v) => v.id === bookingData.carType) || vehList[1] || { name: "Sedan", category: "Comfortable Intercity" };
 

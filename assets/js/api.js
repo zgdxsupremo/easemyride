@@ -1,5 +1,5 @@
 /**
- * EaseMyRide — Google Apps Script Backend API Client
+ * RideOnDemand — Google Apps Script Backend API Client
  * 
  * Securely communicates with the Google Apps Script Web App backend.
  * Handles search logging, booking creation, status updates, and admin exports.
@@ -18,7 +18,7 @@ const ApiService = (() => {
    * Helper to check if a valid Google Apps Script Web App URL is configured.
    */
   function isAppsScriptConfigured() {
-    const url = typeof window !== "undefined" && window.EaseMyRideConfig && window.EaseMyRideConfig.appsScriptUrl;
+    const url = typeof window !== "undefined" && window.RideOnDemandConfig && window.RideOnDemandConfig.appsScriptUrl;
     return Boolean(url && url.includes("script.google.com/macros/s/"));
   }
 
@@ -47,7 +47,7 @@ const ApiService = (() => {
    * Generates customer SMS text representation using CONFIG helpline.
    */
   function generateSmsText(booking) {
-    const config = (typeof window !== "undefined" && (window.RideOnDemandConfig || window.EaseMyRideConfig)) || { helplineNumber: "7973785807" };
+    const config = (typeof window !== "undefined" && (window.RideOnDemandConfig || window.RideOnDemandConfig)) || { helplineNumber: "7973785807" };
     const helpline = config.helplineNumber || "7973785807";
     const route = booking.fromCity && booking.toCity ? `${booking.fromCity} → ${booking.toCity}` : (booking.from_city && booking.to_city ? `${booking.from_city} → ${booking.to_city}` : "Intercity Route");
     const carName = (booking.carType || booking.vehicle_type || "Sedan").toUpperCase();
@@ -99,7 +99,7 @@ const ApiService = (() => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
-      const response = await fetch(window.EaseMyRideConfig.appsScriptUrl, {
+      const response = await fetch(window.RideOnDemandConfig.appsScriptUrl, {
         method: "POST",
         mode: "no-cors", // Apps Script redirects require handling or no-cors for simple submission
         headers: { "Content-Type": "application/json" },
@@ -126,7 +126,7 @@ const ApiService = (() => {
    * Returns temporary payment request ID and payment metadata.
    */
   async function submitBooking(bookingData) {
-    const apiBase = (typeof window !== "undefined" && (window.RideOnDemandConfig || window.EaseMyRideConfig)?.apiBaseUrl) || "/api";
+    const apiBase = (typeof window !== "undefined" && (window.RideOnDemandConfig || window.RideOnDemandConfig)?.apiBaseUrl) || "/api";
 
     const payload = {
       customerName: (bookingData.fullName || bookingData.customerName || "").trim(),
@@ -200,7 +200,7 @@ const ApiService = (() => {
    * Submits payment proof (UTR number & optional screenshot file)
    */
   async function submitPaymentProof(bookingId, formData) {
-    const apiBase = (typeof window !== "undefined" && (window.RideOnDemandConfig || window.EaseMyRideConfig)?.apiBaseUrl) || "/api";
+    const apiBase = (typeof window !== "undefined" && (window.RideOnDemandConfig || window.RideOnDemandConfig)?.apiBaseUrl) || "/api";
 
     try {
       const res = await fetch(`${apiBase}/bookings/${bookingId}/submit-payment`, {
@@ -227,7 +227,7 @@ const ApiService = (() => {
    * Retrieves live booking status
    */
   async function getBookingStatus(identifier) {
-    const apiBase = (typeof window !== "undefined" && (window.RideOnDemandConfig || window.EaseMyRideConfig)?.apiBaseUrl) || "/api";
+    const apiBase = (typeof window !== "undefined" && (window.RideOnDemandConfig || window.RideOnDemandConfig)?.apiBaseUrl) || "/api";
 
     try {
       const res = await fetch(`${apiBase}/bookings/${identifier}/status`);
@@ -253,7 +253,7 @@ const ApiService = (() => {
   async function getAdminData() {
     if (isAppsScriptConfigured()) {
       try {
-        const url = `${window.EaseMyRideConfig.appsScriptUrl}?action=get_admin_data&t=${Date.now()}`;
+        const url = `${window.RideOnDemandConfig.appsScriptUrl}?action=get_admin_data&t=${Date.now()}`;
         const res = await fetch(url);
         const data = await res.json();
         if (data && data.success) {
@@ -265,7 +265,7 @@ const ApiService = (() => {
     }
 
     // Local Storage Mock Admin Provider
-    const bookings = JSON.parse(localStorage.getItem(EaseMyRideConfig.storageKeys.completedBookings) || "[]");
+    const bookings = JSON.parse(localStorage.getItem(RideOnDemandConfig.storageKeys.completedBookings) || "[]");
     const searches = JSON.parse(localStorage.getItem("emr_searches_log") || "[]");
 
     // Add initial mock records if completely empty for immediate demonstration
@@ -294,7 +294,7 @@ const ApiService = (() => {
           vehicleAdjustment: 0,
           finalFare: 2930,
           remarks: "Please arrive 10 mins early.",
-          generatedSms: "EaseMyRide: Your cab booking request has been received. Booking ID: EMR-20260828-1001. Route: Amritsar -> Chandigarh. Fare: ₹2,930.",
+          generatedSms: "RideOnDemand: Your cab booking request has been received. Booking ID: EMR-20260828-1001. Route: Amritsar -> Chandigarh. Fare: ₹2,930.",
           smsStatus: "READY"
         },
         {
@@ -320,11 +320,11 @@ const ApiService = (() => {
           vehicleAdjustment: 4000,
           finalFare: 9880,
           remarks: "Luggage space needed for 4 bags.",
-          generatedSms: "EaseMyRide: Your cab booking request has been received. Booking ID: EMR-20260828-1002. Route: Delhi -> Jaipur. Fare: ₹9,880.",
+          generatedSms: "RideOnDemand: Your cab booking request has been received. Booking ID: EMR-20260828-1002. Route: Delhi -> Jaipur. Fare: ₹9,880.",
           smsStatus: "SENT"
         }
       ];
-      localStorage.setItem(EaseMyRideConfig.storageKeys.completedBookings, JSON.stringify(demoBookings));
+      localStorage.setItem(RideOnDemandConfig.storageKeys.completedBookings, JSON.stringify(demoBookings));
       bookings.push(...demoBookings);
     }
 
@@ -343,11 +343,11 @@ const ApiService = (() => {
    */
   async function updateBookingStatus(bookingId, newStatus) {
     try {
-      const list = JSON.parse(localStorage.getItem(EaseMyRideConfig.storageKeys.completedBookings) || "[]");
+      const list = JSON.parse(localStorage.getItem(RideOnDemandConfig.storageKeys.completedBookings) || "[]");
       const idx = list.findIndex((b) => b.bookingId === bookingId);
       if (idx !== -1) {
         list[idx].bookingStatus = newStatus;
-        localStorage.setItem(EaseMyRideConfig.storageKeys.completedBookings, JSON.stringify(list));
+        localStorage.setItem(RideOnDemandConfig.storageKeys.completedBookings, JSON.stringify(list));
       }
     } catch (e) {
       console.warn("Storage update notice:", e);
@@ -355,7 +355,7 @@ const ApiService = (() => {
 
     if (isAppsScriptConfigured()) {
       try {
-        await fetch(window.EaseMyRideConfig.appsScriptUrl, {
+        await fetch(window.RideOnDemandConfig.appsScriptUrl, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({

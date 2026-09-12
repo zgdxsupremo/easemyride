@@ -1,5 +1,5 @@
 /**
- * EaseMyRide — Core Pricing Engine
+ * RideOnDemand — Core Pricing Engine
  * 
  * Implements transparent, deterministic fare calculations for all vehicle
  * categories across One Way, Round Trip, Local Sightseeing, and Airport Transfers.
