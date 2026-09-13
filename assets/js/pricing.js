@@ -1,5 +1,5 @@
 /**
- * RideOnDemand — Core Pricing Engine
+ * MargDrive — Core Pricing Engine
  * 
  * Implements transparent, deterministic fare calculations for all vehicle
  * categories across One Way, Round Trip, Local Sightseeing, and Airport Transfers.

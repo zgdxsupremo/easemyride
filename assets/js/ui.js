@@ -1,5 +1,5 @@
 /**
- * RideOnDemand — Reusable UI Components & Helpers
+ * MargDrive — Reusable UI Components & Helpers
  * 
  * Provides interactive modals, toast notifications, accordion controllers,
  * mobile drawer management, clipboard helpers, and formatters.
@@ -255,14 +255,14 @@ const UI = (() => {
    * @param {string} activePage
    */
   function injectNavigation(activePage = "home") {
-    const config = window.RideOnDemandConfig || window.RideOnDemandConfig || { helplineNumber: "7973785807" };
+    const config = window.MargDriveConfig || window.MargDriveConfig || { helplineNumber: "7973785807" };
     const helpline = config.helplineNumber || "7973785807";
 
     const headerEl = document.getElementById("site-header");
     if (headerEl) {
       headerEl.innerHTML = `
         <div class="container nav-container">
-          <a href="index.html" class="brand-logo" aria-label="RideOnDemand Home">
+          <a href="index.html" class="brand-logo" aria-label="MargDrive Home">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2"/>
               <circle cx="7" cy="17" r="2"/>
@@ -323,7 +323,7 @@ const UI = (() => {
                 </div>
                 <div class="footer-contact-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                  <span>Email: support@rideondemand.com</span>
+                  <span>Email: support@MargDrive.com</span>
                 </div>
               </div>
             </div>
@@ -359,7 +359,7 @@ const UI = (() => {
         </div>
         <div class="footer-bottom">
           <div class="container footer-bottom-flex">
-            <p>© 2026 RideOnDemand. All rights reserved. Built for seamless travel.</p>
+            <p>© 2026 MargDrive. All rights reserved. Built for seamless travel.</p>
             <p style="font-size:0.8rem; color:var(--gray-500);">Tolls, parking & applicable taxes extra as per actuals.</p>
           </div>
         </div>

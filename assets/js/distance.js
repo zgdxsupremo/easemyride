@@ -1,5 +1,5 @@
 /**
- * RideOnDemand — Distance & Route Calculation Module
+ * MargDrive — Distance & Route Calculation Module
  * 
  * Abstraction layer for calculating real driving distances between Indian cities.
  * Integrates with Google Routes API / Google Distance Matrix when configured,
@@ -228,7 +228,7 @@ const DistanceService = (() => {
     }
 
     // 1. Check if Google Maps API Key is configured for real live routing
-    if (typeof window !== "undefined" && window.RideOnDemandConfig && window.RideOnDemandConfig.googleMapsApiKey && typeof google !== "undefined" && google.maps) {
+    if (typeof window !== "undefined" && window.MargDriveConfig && window.MargDriveConfig.googleMapsApiKey && typeof google !== "undefined" && google.maps) {
       try {
         const matrixService = new google.maps.DistanceMatrixService();
         const response = await new Promise((resolve, reject) => {

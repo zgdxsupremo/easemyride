@@ -3,7 +3,7 @@ const path = require('path');
 
 const projectDir = path.join(__dirname);
 
-console.log("=== RideOnDemand MVP Automated Verification ===");
+console.log("=== MargDrive MVP Automated Verification ===");
 
 // 1. Check all required files exist
 const requiredFiles = [
@@ -122,5 +122,5 @@ console.log("\n--- Testing Distance Service Matrix ---");
   console.log(`Amritsar -> Chandigarh: ${d2.distanceKm} KM, ${d2.duration}`);
   if (d2.distanceKm !== 230) throw new Error("Matrix lookup failed for Amritsar-Chandigarh");
 
-  console.log("\n🎉 ALL TESTS PASSED SUCCESSFULLY! RideOnDemand MVP is production-ready.");
+  console.log("\n🎉 ALL TESTS PASSED SUCCESSFULLY! MargDrive MVP is production-ready.");
 })();

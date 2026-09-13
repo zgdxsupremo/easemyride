@@ -1,5 +1,5 @@
 /**
- * RideOnDemand — Booking Confirmation & Success Controller (success.js)
+ * MargDrive — Booking Confirmation & Success Controller (success.js)
  * 
  * Displays verified booking credentials, receipt details, customer SMS generation,
  * clipboard copy, .txt download, device-native SMS trigger, and support links.
@@ -28,7 +28,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 2. Read active booking from storage
   if (!booking) {
     try {
-      booking = JSON.parse(localStorage.getItem(RideOnDemandConfig.storageKeys.activeBooking));
+      booking = JSON.parse(localStorage.getItem(MargDriveConfig.storageKeys.activeBooking));
     } catch (e) {
       booking = null;
     }
@@ -37,8 +37,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 3. Fallback representation if no booking in memory
   if (!booking) {
     booking = {
-      bookingCode: bookingIdFromUrl || "ROD-20260912-0001",
-      bookingId: bookingIdFromUrl || "ROD-20260912-0001",
+      bookingCode: bookingIdFromUrl || "MD-20260912-0001",
+      bookingId: bookingIdFromUrl || "MD-20260912-0001",
       customerName: "Valued Customer",
       customerPhone: "9876543210",
       customerEmail: "customer@example.com",
@@ -68,7 +68,7 @@ function renderSuccessCard(booking) {
   const receiptContainer = document.getElementById("trip-receipt-items");
   const smsContentEl = document.getElementById("sms-text-content");
 
-  const displayCode = booking.bookingCode || booking.booking_code || booking.bookingId || "ROD-CONFIRMED";
+  const displayCode = booking.bookingCode || booking.booking_code || booking.bookingId || "MD-CONFIRMED";
   const customerName = booking.customerName || booking.customer_name || booking.fullName || "Customer";
   const phone = booking.customerPhone || booking.customer_phone || booking.phoneNumber || "7973785807";
   const from = booking.fromCity || booking.from_city || "Origin";
@@ -163,7 +163,7 @@ function renderSuccessCard(booking) {
   const downloadSmsBtn = document.getElementById("btn-download-sms");
   if (downloadSmsBtn) {
     downloadSmsBtn.addEventListener("click", () => {
-      UI.downloadFile(`RideOnDemand_${displayCode}_Receipt.txt`, smsText);
+      UI.downloadFile(`MargDrive_${displayCode}_Receipt.txt`, smsText);
     });
   }
 
@@ -177,7 +177,7 @@ function renderSuccessCard(booking) {
   // WhatsApp Support Button
   const waBtn = document.getElementById("btn-whatsapp-support");
   if (waBtn) {
-    const waText = encodeURIComponent(`Hi RideOnDemand Team, I have booked a cab (ID: ${displayCode}). Please assist with my ride.`);
+    const waText = encodeURIComponent(`Hi MargDrive Team, I have booked a cab (ID: ${displayCode}). Please assist with my ride.`);
     waBtn.href = `https://wa.me/917973785807?text=${waText}`;
   }
 

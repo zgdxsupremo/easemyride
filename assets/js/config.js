@@ -1,26 +1,26 @@
 /**
- * RideOnDemand — Public Client Configuration
+ * MargDrive — Public Client Configuration
  * Contains non-sensitive configuration, business defaults, vehicle metadata,
  * and routing presets.
  * 
  * IMPORTANT: Secret keys or private credentials MUST NEVER be placed here.
  */
 
-const RideOnDemandConfig = {
+const MargDriveConfig = {
   // Brand details
-  companyName: "RideOnDemand",
-  brandName: "RideOnDemand",
+  companyName: "MargDrive",
+  brandName: "MargDrive",
   tagline: "India's Premier On-Demand Intercity & Airport Cab Service",
   helplineNumber: "7973785807",
   whatsappNumber: "+917973785807",
-  supportEmail: "support@rideondemand.com",
+  supportEmail: "support@MargDrive.com",
   currentYear: 2026,
 
   // Customer Booking Payment Configuration (₹500 Fee)
   bookingPaymentUpi: "muskankushwaha787-2@oksbi",
   bookingConfirmationFee: 500,
   paymentProvider: "MANUAL_UPI",
-  upiDeepLink: "upi://pay?pa=muskankushwaha787-2@oksbi&pn=RideOnDemand&am=500&cu=INR",
+  upiDeepLink: "upi://pay?pa=muskankushwaha787-2@oksbi&pn=MargDrive&am=500&cu=INR",
 
   // API Backend Base URL
   apiBaseUrl: window.location.port === "4000" ? "/api" : "http://localhost:4000/api",
@@ -145,9 +145,9 @@ const RideOnDemandConfig = {
 
 // Export to window object for modular Vanilla JS architecture
 if (typeof window !== "undefined") {
-  window.RideOnDemandConfig = RideOnDemandConfig;
-  window.RideOnDemandConfig = RideOnDemandConfig;
+  window.MargDriveConfig = MargDriveConfig;
+  window.MargDriveConfig = MargDriveConfig;
 }
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = RideOnDemandConfig;
+  module.exports = MargDriveConfig;
 }

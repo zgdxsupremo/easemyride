@@ -1,5 +1,5 @@
 /**
- * RideOnDemand — Admin Dashboard Controller (admin.js)
+ * MargDrive — Admin Dashboard Controller (admin.js)
  * 
  * Provides KPI analytics, live booking status management, dual tab viewing
  * (Confirmed Bookings & Search Inquiries/Leads), search filtering, and CSV exports.
@@ -10,7 +10,7 @@ let adminDataCache = { bookings: [], searches: [] };
 
 document.addEventListener("DOMContentLoaded", () => {
   // Check auth state
-  const isAuth = sessionStorage.getItem(RideOnDemandConfig.storageKeys.adminAuth) === "true";
+  const isAuth = sessionStorage.getItem(MargDriveConfig.storageKeys.adminAuth) === "true";
   const authOverlay = document.getElementById("admin-auth-overlay");
   const authForm = document.getElementById("admin-login-form");
   const authPassInput = document.getElementById("admin-passcode");
@@ -28,10 +28,10 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const entered = authPassInput.value.trim();
       // Default development passcode
-      if (entered === "admin123" || entered === "RideOnDemand2026") {
-        sessionStorage.setItem(RideOnDemandConfig.storageKeys.adminAuth, "true");
+      if (entered === "admin123" || entered === "MargDrive2026") {
+        sessionStorage.setItem(MargDriveConfig.storageKeys.adminAuth, "true");
         if (authOverlay) authOverlay.style.display = "none";
-        UI.showToast("Welcome", "Authenticated to RideOnDemand Admin Portal.", "success");
+        UI.showToast("Welcome", "Authenticated to MargDrive Admin Portal.", "success");
         initDashboard();
       } else {
         UI.showToast("Access Denied", "Invalid administrative passcode.", "error");
@@ -52,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("btn-admin-logout");
   if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
-      sessionStorage.removeItem(RideOnDemandConfig.storageKeys.adminAuth);
+      sessionStorage.removeItem(MargDriveConfig.storageKeys.adminAuth);
       window.location.reload();
     });
   }
@@ -398,7 +398,7 @@ function setupCsvExports() {
 
       const csvContent = [headers.join(","), ...rows].join("\r\n");
       const dateStr = FormValidator.formatDateForInput(new Date());
-      UI.downloadFile(`RideOnDemand_Bookings_${dateStr}.csv`, csvContent, "text/csv;charset=utf-8;");
+      UI.downloadFile(`MargDrive_Bookings_${dateStr}.csv`, csvContent, "text/csv;charset=utf-8;");
     };
   }
 
@@ -429,7 +429,7 @@ function setupCsvExports() {
 
       const csvContent = [headers.join(","), ...rows].join("\r\n");
       const dateStr = FormValidator.formatDateForInput(new Date());
-      UI.downloadFile(`RideOnDemand_Searches_${dateStr}.csv`, csvContent, "text/csv;charset=utf-8;");
+      UI.downloadFile(`MargDrive_Searches_${dateStr}.csv`, csvContent, "text/csv;charset=utf-8;");
     };
   }
 
@@ -449,7 +449,7 @@ function setupCsvExports() {
 
       const csvContent = [headers.join(","), ...rows].join("\r\n");
       const dateStr = FormValidator.formatDateForInput(new Date());
-      UI.downloadFile(`RideOnDemand_Customer_SMS_${dateStr}.csv`, csvContent, "text/csv;charset=utf-8;");
+      UI.downloadFile(`MargDrive_Customer_SMS_${dateStr}.csv`, csvContent, "text/csv;charset=utf-8;");
     };
   }
 }

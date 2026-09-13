@@ -1,19 +1,19 @@
 # Google Apps Script & Google Sheets Setup Guide
 
-Follow this 5-minute setup guide to connect **RideOnDemand** to your own live Google Sheets database.
+Follow this 5-minute setup guide to connect **MargDrive** to your own live Google Sheets database.
 
 ---
 
 ## Step 1: Create a Google Sheet
 1. Open [Google Sheets](https://sheets.new) in your browser.
-2. Name the sheet: **RideOnDemand Database (Production/MVP)**.
+2. Name the sheet: **MargDrive Database (Production/MVP)**.
 
 ---
 
 ## Step 2: Open Google Apps Script Editor
 1. In your new Google Sheet, click **Extensions** > **Apps Script** in the top navigation bar.
 2. Delete any existing template code in `Code.gs`.
-3. Open [`google-apps-script/Code.gs`](file:///C:/Users/om/.gemini/antigravity/scratch/RideOnDemand/google-apps-script/Code.gs) and copy all code into the Apps Script editor.
+3. Open [`google-apps-script/Code.gs`](file:///C:/Users/om/.gemini/antigravity/scratch/MargDrive/google-apps-script/Code.gs) and copy all code into the Apps Script editor.
 4. Click the **Save Project** icon (💾).
 
 ---
@@ -34,7 +34,7 @@ Follow this 5-minute setup guide to connect **RideOnDemand** to your own live Go
 1. In the Apps Script editor, click the blue **Deploy** button (top-right) > **New deployment**.
 2. Click the gear icon ⚙️ next to *Select type* and select **Web app**.
 3. Configure the settings:
-   - **Description**: `RideOnDemand Backend API v1`
+   - **Description**: `MargDrive Backend API v1`
    - **Execute as**: `Me (your_email@gmail.com)`
    - **Who has access**: **`Anyone`** *(Essential so customer browsers can submit bookings)*
 4. Click **Deploy**.
@@ -43,7 +43,7 @@ Follow this 5-minute setup guide to connect **RideOnDemand** to your own live Go
 ---
 
 ## Step 5: Connect to Frontend
-1. Open [`assets/js/config.js`](file:///C:/Users/om/.gemini/antigravity/scratch/RideOnDemand/assets/js/config.js) in your project.
+1. Open [`assets/js/config.js`](file:///C:/Users/om/.gemini/antigravity/scratch/MargDrive/assets/js/config.js) in your project.
 2. Replace `"YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL_HERE"` with your copied Web App URL:
    ```javascript
    appsScriptUrl: "https://script.google.com/macros/s/AKfycb.../exec",
