@@ -105,7 +105,7 @@ Deploy to any static hosting provider within seconds:
 ### Deploy to Cloudflare Pages / Vercel / Netlify / GitHub Pages:
 1. Push the `/MargDrive` repository to GitHub or upload the folder directly.
 2. Set the publish directory to the root `/` (no build command needed).
-3. Connect your custom domain (e.g. `https://MargDrive.com`).
+3. Connect your custom domain (e.g. `https://margdrive.in`).
 
 ---
 

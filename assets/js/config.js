@@ -13,7 +13,7 @@ const MargDriveConfig = {
   tagline: "India's Premier On-Demand Intercity & Airport Cab Service",
   helplineNumber: "7973785807",
   whatsappNumber: "+917973785807",
-  supportEmail: "support@MargDrive.com",
+  supportEmail: "support@margdrive.in",
   currentYear: 2026,
 
   // Customer Booking Payment Configuration (₹500 Fee)
