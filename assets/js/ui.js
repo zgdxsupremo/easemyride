@@ -269,7 +269,7 @@ const UI = (() => {
               <path d="M9 17h6"/>
               <circle cx="17" cy="17" r="2"/>
             </svg>
-            <span>Ride<span class="highlight">On</span>Demand</span>
+            <span>Marg<span class="highlight">Drive</span></span>
           </a>
 
           <ul class="nav-links">
@@ -314,7 +314,7 @@ const UI = (() => {
         <div class="footer-top">
           <div class="container footer-grid">
             <div class="footer-brand">
-              <div class="footer-logo">Ride<span class="highlight" style="color:var(--accent);">On</span>Demand</div>
+              <div class="footer-logo">Marg<span class="highlight" style="color:var(--accent);">Drive</span></div>
               <p class="footer-tagline">India's Premier On-Demand Intercity & Airport Cab Service. Verified chauffeurs, transparent fares, and 24/7 dedicated helpline support.</p>
               <div class="footer-contact-info">
                 <div class="footer-contact-item">
