@@ -67,7 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
 function initBookingForm(bookingData) {
   const form = document.getElementById("booking-checkout-form");
   const nameInput = document.getElementById("passenger-name");
-  const emailInput = document.getElementById("passenger-email");
   const phoneInput = document.getElementById("passenger-phone");
   const pickupAddressInput = document.getElementById("pickup-address");
   const dropAddressInput = document.getElementById("drop-address");
@@ -112,7 +111,6 @@ function initBookingForm(bookingData) {
 
       let hasError = false;
       const fullName = nameInput ? nameInput.value.trim() : "";
-      const email = emailInput ? emailInput.value.trim() : "";
       const phone = phoneInput ? phoneInput.value.trim() : "";
       const pickupAddress = pickupAddressInput ? pickupAddressInput.value.trim() : "";
       const dropAddress = dropAddressInput ? dropAddressInput.value.trim() : "";
@@ -125,12 +123,6 @@ function initBookingForm(bookingData) {
       // 1. Full Name Validation
       if (!fullName || fullName.length < 3) {
         FormValidator.showFieldError(nameInput, "Please enter full passenger name (min 3 chars).");
-        hasError = true;
-      }
-
-      // 2. Email Validation
-      if (!email || !FormValidator.isValidEmail(email)) {
-        FormValidator.showFieldError(emailInput, "Please enter a valid email address.");
         hasError = true;
       }
 
@@ -172,7 +164,6 @@ function initBookingForm(bookingData) {
 
       const finalBookingPayload = {
         customerName: fullName,
-        customerEmail: email,
         customerPhone: FormValidator.sanitizePhoneNumber(phone),
         serviceType: bookingData.serviceType,
         fromCity: bookingData.pickupCity || bookingData.fromCity,
