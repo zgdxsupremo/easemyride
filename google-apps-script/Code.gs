@@ -10,17 +10,48 @@
  */
 
 // Global Sheet Names
-var SHEET_SEARCHES = "SEARCHES";
-var SHEET_BOOKINGS = "BOOKINGS";
-var SHEET_CONFIG = "CONFIG";
+
+const SPREADSHEET_ID = "1aLQiG8wWAeWvjl6ccGG8U1NwEFRVkkrNXGszLdFWUk0";
+
+const SHEET_SEARCHES = "SEARCHES";
+const SHEET_BOOKINGS = "BOOKINGS";
+const SHEET_CONFIG = "CONFIG";
 
 /**
  * Handles all incoming POST requests from the MargDrive web client.
  */
+
+// ============================================
+// MARGDRIVE GOOGLE SHEETS CONFIGURATION
+// ============================================
+
 function doPost(e) {
   try {
-    var rawContent = e.postData.contents;
-    var data = JSON.parse(rawContent);
+    if (!e) {
+      return createJsonResponse({
+        success: false,
+        message: "No request object received. Use the deployed Web App URL to test this endpoint."
+      });
+    }
+
+    var data = {};
+
+    // Accept JSON body from fetch()
+    if (e.postData && e.postData.contents) {
+      var rawContent = String(e.postData.contents).trim();
+
+      if (rawContent) {
+        try {
+          data = JSON.parse(rawContent);
+        } catch (jsonErr) {
+          // Also accept normal form-encoded POST data.
+          data = e.parameter || {};
+        }
+      }
+    } else {
+      data = e.parameter || {};
+    }
+
     var action = data.action || "create_booking";
 
     if (action === "log_search") {
@@ -60,7 +91,7 @@ function doGet(e) {
  * Appends a search log record to the SEARCHES sheet.
  */
 function handleLogSearch(data) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = getOrCreateSheet(ss, SHEET_SEARCHES, getSearchesHeaders());
 
   var searchId = data.searchId || ("SRC-" + Date.now().toString(36).toUpperCase());
@@ -95,7 +126,7 @@ function handleLogSearch(data) {
  * appends to BOOKINGS sheet, and applies visual highlight formatting.
  */
 function handleCreateBooking(data) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = getOrCreateSheet(ss, SHEET_BOOKINGS, getBookingsHeaders());
   var config = readBusinessConfig(ss);
 
@@ -233,7 +264,7 @@ function handleCreateBooking(data) {
  * Updates status of an existing booking in BOOKINGS sheet.
  */
 function handleUpdateBookingStatus(data) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName(SHEET_BOOKINGS);
   if (!sheet) return createJsonResponse({ success: false, message: "Bookings sheet not found" }, 404);
 
@@ -275,7 +306,7 @@ function handleUpdateBookingStatus(data) {
  * Returns complete admin analytics payload (Bookings, Searches, Config).
  */
 function handleGetAdminData() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var bSheet = ss.getSheetByName(SHEET_BOOKINGS);
   var sSheet = ss.getSheetByName(SHEET_SEARCHES);
 
@@ -402,7 +433,7 @@ function readBusinessConfig(ss) {
  * Returns CONFIG sheet data as JSON.
  */
 function handleGetConfig() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var config = readBusinessConfig(ss);
   return createJsonResponse({ success: true, config: config });
 }
@@ -411,7 +442,7 @@ function handleGetConfig() {
  * Setup Utility: Run this once inside Apps Script Editor to format all sheets!
  */
 function initializeDatabase() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
 
   // 1. Searches Sheet
   var sSheet = getOrCreateSheet(ss, SHEET_SEARCHES, getSearchesHeaders());
