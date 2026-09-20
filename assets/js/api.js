@@ -174,9 +174,9 @@ const ApiService = (() => {
         bookingStatus: "PAYMENT_PENDING",
         ...payload,
         paymentMetadata: {
-          upiId: "muskankushwaha787-2@oksbi",
+          upiId: "7973785807@kotakbank",
           amountInr: 500,
-          upiDeepLink: "upi://pay?pa=muskankushwaha787-2@oksbi&pn=MargDrive&am=500&cu=INR"
+          upiDeepLink: "upi://pay?pa=7973785807@kotakbank&pn=MargDrive&am=500&cu=INR"
         }
       };
 
