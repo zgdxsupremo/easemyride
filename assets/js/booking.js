@@ -9,7 +9,7 @@ const PAYMENT_CONFIG = {
   provider: "MANUAL_UPI",
   amount: 500,
   currency: "INR",
-  upiId: "muskankushwaha787-2@oksbi",
+  upiId: "sahilchoudhary89310-2@oksbi",
   merchantName: "Marg Drive"
 };
 
