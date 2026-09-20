@@ -1,14 +1,19 @@
-/**
- * MargDrive — Homepage Controller (app.js)
+﻿/**
+ * Marg Drive — Homepage Controller (app.js)
  * 
  * Manages the multi-tab booking search widget, dynamic fields per service,
- * date restrictions, autocomplete location hints, and search submission.
+ * date restrictions, pan-India city autocomplete, and search submission.
  */
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   // Initialize Header, Footer, and Navigation
   UI.injectNavigation("home");
   UI.initAccordion();
+
+  // Initialize CitySearch dataset
+  if (typeof CitySearch !== "undefined" && typeof CitySearch.init === "function") {
+    await CitySearch.init();
+  }
 
   // Popular Routes Dynamic Rendering
   renderPopularRoutes();
@@ -76,7 +81,6 @@ document.addEventListener("DOMContentLoaded", () => {
    * @param {string} service
    */
   function updateFormLayoutForService(service) {
-    // Reset any field error highlights
     const errorGroups = searchForm.querySelectorAll(".has-error");
     errorGroups.forEach((g) => g.classList.remove("has-error"));
 
@@ -117,10 +121,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Location Autocomplete Setup
-  setupAutocomplete(pickupCityInput);
-  setupAutocomplete(dropCityInput);
-  setupAutocomplete(airportLocationInput);
+  // Bind Pan-India City Autocomplete Engine
+  if (typeof CitySearch !== "undefined" && typeof CitySearch.attachAutocomplete === "function") {
+    CitySearch.attachAutocomplete(pickupCityInput);
+    CitySearch.attachAutocomplete(dropCityInput);
+    if (airportLocationInput) CitySearch.attachAutocomplete(airportLocationInput);
+  }
 
   // Search Form Submission
   if (searchForm) {
@@ -129,17 +135,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
       let hasError = false;
       const pickupVal = pickupCityInput.value.trim();
-      const phoneVal = phoneInput.value.trim();
+      const phoneVal = phoneInput ? phoneInput.value.trim() : "";
       const pickupDateVal = pickupDateInput.value;
       const pickupTimeVal = pickupTimeInput.value;
 
-      // 1. Validate Phone
-      if (!phoneVal) {
-        FormValidator.showFieldError(phoneInput, "Please enter your 10-digit mobile number.");
-        hasError = true;
-      } else if (!FormValidator.isValidIndianPhone(phoneVal)) {
-        FormValidator.showFieldError(phoneInput, "Enter a valid 10-digit Indian mobile number.");
-        hasError = true;
+      // 1. Validate Phone if present
+      if (phoneInput) {
+        if (!phoneVal) {
+          FormValidator.showFieldError(phoneInput, "Please enter your 10-digit mobile number.");
+          hasError = true;
+        } else if (!FormValidator.isValidIndianPhone(phoneVal)) {
+          FormValidator.showFieldError(phoneInput, "Enter a valid 10-digit Indian mobile number.");
+          hasError = true;
+        }
       }
 
       // 2. Validate Pickup Date
@@ -220,15 +228,14 @@ document.addEventListener("DOMContentLoaded", () => {
           const selectedAirport = MargDriveConfig.airports.find((a) => a.id === airportId) || MargDriveConfig.airports[0];
           originCity = transferType === "airport_to_city" ? selectedAirport.name : pickupVal;
           destCity = transferType === "airport_to_city" ? pickupVal : selectedAirport.name;
-          distanceData = await DistanceService.calculateDistance(originCity, destCity, "airport");
+          distanceData = await DistanceService.calculateRoadDistance(originCity, destCity, "airport");
         } else if (currentService === "local") {
           destCity = `${pickupVal} Sightseeing`;
-          distanceData = await DistanceService.calculateDistance(pickupVal, destCity, "local");
+          distanceData = await DistanceService.calculateRoadDistance(pickupVal, destCity, "local");
         } else {
-          distanceData = await DistanceService.calculateDistance(pickupVal, dropVal, currentService);
+          distanceData = await DistanceService.calculateRoadDistance(pickupVal, dropVal, currentService);
         }
 
-        // Calculate days for round trip
         let tripDays = 1;
         if (currentService === "roundtrip" && pickupDateVal && returnDateVal) {
           const p = new Date(pickupDateVal);
@@ -237,60 +244,55 @@ document.addEventListener("DOMContentLoaded", () => {
           tripDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
         }
 
-        // Search Object to persist & log
-        const searchPayload = {
+        // Authoritative Search State Object
+        const newSearchState = {
           serviceType: currentService,
-          pickupLocation: originCity,
-          dropLocation: destCity,
-          fromCity: pickupVal,
-          toCity: dropVal || destCity,
+          pickupCity: originCity,
+          dropCity: destCity,
           pickupDate: pickupDateVal,
           pickupTime: pickupTimeVal || "08:00",
           returnDate: returnDateVal,
           returnTime: returnTimeVal,
-          phoneNumber: FormValidator.sanitizePhoneNumber(phoneVal),
+          airport: airportId,
+          days: tripDays,
+          packageId,
+          transferType,
           distanceKm: distanceData.distanceKm,
           duration: distanceData.duration,
-          days: tripDays,
-          packageId: packageId,
-          airportId: airportId,
-          transferType: transferType,
-          searchedAt: new Date().toISOString()
+          pricing: null
         };
 
-        // 1. Auto-log search data to Google Apps Script / SEARCHES sheet in background
-        ApiService.logSearch(searchPayload);
+        // 1. Log search to Google Apps Script webhook
+        ApiService.logSearch(newSearchState);
 
-        // 2. Save active search state in localStorage
-        localStorage.setItem(MargDriveConfig.storageKeys.lastSearch, JSON.stringify(searchPayload));
+        // 2. Overwrite localStorage completely
+        localStorage.setItem(MargDriveConfig.storageKeys.lastSearch, JSON.stringify(newSearchState));
 
-        // 3. Build URL query params for sharing / bookmarking search results
+        // 3. Build URL query params
         const params = new URLSearchParams({
           service: currentService,
           from: originCity,
           to: destCity,
           date: pickupDateVal,
           time: pickupTimeVal,
-          phone: FormValidator.sanitizePhoneNumber(phoneVal),
-          distance: distanceData.distanceKm,
-          duration: distanceData.duration,
+          dist: distanceData.distanceKm,
           days: tripDays
         });
 
-        if (returnDateVal) params.append("returnDate", returnDateVal);
-        if (returnTimeVal) params.append("returnTime", returnTimeVal);
-        if (packageId) params.append("pkg", packageId);
-        if (transferType) params.append("transferType", transferType);
+        if (phoneVal) params.set("phone", FormValidator.sanitizePhoneNumber(phoneVal));
+        if (returnDateVal) params.set("returnDate", returnDateVal);
+        if (returnTimeVal) params.set("returnTime", returnTimeVal);
+        if (packageId) params.set("pkg", packageId);
+        if (transferType) params.set("transferType", transferType);
 
-        // Redirect to search results page
         setTimeout(() => {
           UI.hideLoading();
           window.location.href = `search.html?${params.toString()}`;
-        }, 400);
+        }, 300);
 
       } catch (err) {
         UI.hideLoading();
-        console.error("Search processing error:", err);
+        console.error("Search error:", err);
         UI.showToast("Error", "Could not calculate route. Please verify city names.", "error");
       }
     });
@@ -324,7 +326,6 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .join("");
 
-    // Attach click listeners to auto-fill search widget
     grid.querySelectorAll(".route-card").forEach((card) => {
       card.addEventListener("click", () => {
         const from = card.dataset.from;
@@ -332,65 +333,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (pickupCityInput && dropCityInput) {
           pickupCityInput.value = from;
           dropCityInput.value = to;
-          // Switch to one-way tab
           const onewayBtn = document.querySelector(".tab-btn[data-service='oneway']");
           if (onewayBtn) onewayBtn.click();
-
-          // Scroll to widget
           document.getElementById("hero-search-form").scrollIntoView({ behavior: "smooth", block: "center" });
-          phoneInput.focus();
+          if (phoneInput) phoneInput.focus();
         }
       });
-    });
-  }
-
-  /**
-   * Autocomplete helper for Indian cities
-   */
-  function setupAutocomplete(inputElement) {
-    if (!inputElement) return;
-
-    const suggestionsBox = document.createElement("div");
-    suggestionsBox.className = "autocomplete-suggestions";
-    inputElement.parentElement.appendChild(suggestionsBox);
-
-    const commonCities = [
-      "Delhi", "New Delhi", "Noida", "Gurgaon", "Chandigarh", "Amritsar", "Jaipur", "Agra",
-      "Shimla", "Manali", "Dehradun", "Haridwar", "Rishikesh", "Lucknow", "Kanpur", "Varanasi",
-      "Mumbai", "Pune", "Shirdi", "Nashik", "Goa", "Bengaluru", "Mysuru", "Chennai", "Hyderabad",
-      "Ahmedabad", "Surat", "Vadodara", "Udaipur", "Jodhpur", "Kolkata", "Patna", "Indore"
-    ];
-
-    inputElement.addEventListener("input", () => {
-      const val = inputElement.value.trim().toLowerCase();
-      if (val.length < 2) {
-        suggestionsBox.classList.remove("active");
-        return;
-      }
-
-      const matches = commonCities.filter((c) => c.toLowerCase().includes(val)).slice(0, 6);
-      if (matches.length === 0) {
-        suggestionsBox.classList.remove("active");
-        return;
-      }
-
-      suggestionsBox.innerHTML = matches
-        .map((m) => `<div class="suggestion-item">📍 ${m}</div>`)
-        .join("");
-      suggestionsBox.classList.add("active");
-
-      suggestionsBox.querySelectorAll(".suggestion-item").forEach((item) => {
-        item.addEventListener("click", () => {
-          inputElement.value = item.textContent.replace("📍 ", "");
-          suggestionsBox.classList.remove("active");
-        });
-      });
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!inputElement.parentElement.contains(e.target)) {
-        suggestionsBox.classList.remove("active");
-      }
     });
   }
 });

@@ -167,7 +167,7 @@
         <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:1.5rem; margin-bottom:1.5rem; text-align:center;">
           <div style="font-size:0.9rem; color:var(--gray-600); font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Booking Confirmation Fee</div>
           <div style="font-size:2.6rem; font-weight:800; color:var(--primary); margin:0.25rem 0;">₹500</div>
-          <div style="font-size:0.82rem; color:var(--gray-500);">Remaining balance payable directly to driver upon pickup/completion.</div>
+          <div style="font-size:0.82rem; color:var(--gray-500);">Remaining balance payable directly to chauffeur upon pickup/trip completion.</div>
         </div>
 
         <div style="background:#FFF; border:1.5px dashed var(--primary); border-radius:12px; padding:1.25rem; margin-bottom:1.5rem;">
@@ -175,49 +175,47 @@
             <div>
               <div style="font-size:0.85rem; color:var(--gray-600); font-weight:600;">Payment Method: <strong>UPI Transfer</strong></div>
               <div style="font-size:1.1rem; font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--secondary);" id="upi-id-text">muskankushwaha787-2@oksbi</div>
+              <div style="font-size:0.78rem; color:var(--gray-500);">Payee Name: <strong>Marg Drive</strong></div>
             </div>
             <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
               <button type="button" id="btn-copy-upi" class="btn btn-outline btn-sm">
                 <span>📋 COPY UPI ID</span>
               </button>
-              <a id="btn-upi-deeplink" href="upi://pay?pa=muskankushwaha787-2@oksbi&pn=MargDrive&am=500&cu=INR" class="btn btn-primary btn-sm">
-                <span>⚡ Pay in UPI App</span>
+              <a id="btn-upi-deeplink" href="upi://pay?pa=muskankushwaha787-2@oksbi&pn=Marg%20Drive&am=500&cu=INR" class="btn btn-primary btn-sm">
+                <span>⚡ Pay Now in UPI App</span>
               </a>
+            </div>
+          </div>
+
+          <!-- Dynamic QR Code Container for Desktop/Mobile -->
+          <div id="qr-code-section" style="margin-top:1rem; padding-top:1rem; border-top:1px dashed #E2E8F0; text-align:center;">
+            <div style="font-size:0.85rem; font-weight:600; color:var(--gray-700); margin-bottom:0.5rem;">Or Scan QR Code to Pay ₹500:</div>
+            <div id="upi-qr-image-wrapper" style="display:inline-block; padding:10px; background:#fff; border:1px solid #CBD5E1; border-radius:8px;">
+              <img id="upi-qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=upi%3A%2F%2Fpay%3Fpa%3Dmuskankushwaha787-2%40oksbi%26pn%3DMarg%2520Drive%26am%3D500%26cu%3DINR" alt="UPI Payment QR Code" width="180" height="180" style="display:block;">
             </div>
           </div>
         </div>
 
         <!-- Step-by-Step Instructions -->
         <div style="margin-bottom:1.5rem;">
-          <h4 style="font-size:1rem; color:var(--secondary); margin-bottom:0.75rem;">Payment Instructions:</h4>
+          <h4 style="font-size:1rem; color:var(--secondary); margin-bottom:0.75rem;">Easy 3-Step Confirmation:</h4>
           <ol style="padding-left:1.25rem; color:var(--gray-700); font-size:0.9rem; line-height:1.6;">
-            <li>Open your UPI app (Google Pay, PhonePe, Paytm, BHIM, CRED, or Bank App).</li>
-            <li>Send exactly <strong>₹500</strong> to UPI ID: <strong id="upi-id-bold">muskankushwaha787-2@oksbi</strong>.</li>
-            <li>Complete the transaction in your UPI app.</li>
-            <li>Copy the <strong>12-digit UTR / Transaction Reference Number</strong> from your payment receipt.</li>
-            <li>Enter the UTR below and submit confirmation to generate your Booking ID.</li>
+            <li>Click <strong>Pay Now in UPI App</strong> or scan the QR code above using Google Pay, PhonePe, Paytm, or BHIM.</li>
+            <li>Send exactly <strong>₹500</strong> to UPI ID: <strong>muskankushwaha787-2@oksbi</strong> (Marg Drive).</li>
+            <li>Optionally attach a screenshot of the successful payment below and click <strong>I Have Paid ₹500</strong>.</li>
           </ol>
         </div>
 
-        <!-- UTR Submission Form -->
+        <!-- Payment Confirmation Submission Form -->
         <form id="payment-proof-form" novalidate>
-          <div class="form-group" style="margin-bottom:1.25rem;">
-            <label for="payment-utr">UTR / Transaction Reference Number *</label>
-            <div class="input-with-icon">
-              <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-              <input type="text" id="payment-utr" class="form-control" placeholder="e.g. 425619882314" maxlength="30" required>
-            </div>
-            <span class="invalid-feedback" id="utr-error"></span>
-          </div>
-
           <div class="form-group" style="margin-bottom:1.5rem;">
-            <label for="payment-screenshot">Payment Screenshot (Optional)</label>
+            <label for="payment-screenshot">Payment Screenshot (Optional Proof)</label>
             <input type="file" id="payment-screenshot" class="form-control" accept="image/jpeg,image/png,image/jpg,application/pdf">
             <span style="font-size:0.8rem; color:var(--gray-500); display:block; margin-top:0.25rem;">Supported formats: JPG, PNG, PDF (Max 10MB)</span>
           </div>
 
           <button type="submit" id="btn-submit-proof" class="btn btn-primary btn-lg btn-block">
-            <span>Submit Payment Confirmation</span>
+            <span>I Have Paid ₹500 — Confirm Booking</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           </button>
         </form>
@@ -235,8 +233,8 @@
           Status: PAYMENT SUBMITTED / UNDER REVIEW
         </div>
         <p style="color:var(--gray-700); font-size:1rem; max-width:560px; margin:0 auto 1.5rem; line-height:1.6;">
-          Your payment proof for Request <strong id="tracker-req-id"></strong> (UTR: <strong id="tracker-utr"></strong>) has been received.
-          Our operations desk is verifying the payment with the bank ledger. Your final <strong>Booking ID</strong> will be generated once verified.
+          Your payment confirmation for Request <strong id="tracker-req-id"></strong> has been received.
+          Our operations desk is verifying the payment with the bank ledger. Your final <strong>Booking ID</strong> will be issued upon verification.
         </p>
         <div style="background:#F8FAFC; border-radius:10px; padding:1rem; margin-bottom:1.5rem; font-size:0.9rem; color:var(--gray-600);">
           Need immediate assistance? Call our 24/7 Helpline: <strong>7973785807</strong>

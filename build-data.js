@@ -1,0 +1,1069 @@
+﻿const fs = require('fs');
+const path = require('path');
+
+const cities = [
+  {
+    name: 'New Delhi',
+    state: 'Delhi',
+    stateCode: 'DL',
+    region: 'North',
+    latitude: 28.6139,
+    longitude: 77.2090,
+    aliases: ['Delhi', 'NCR', 'New Delhi', 'Dilli', 'IGI Airport', 'DEL'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Delhi',
+    state: 'Delhi',
+    stateCode: 'DL',
+    region: 'North',
+    latitude: 28.7041,
+    longitude: 77.1025,
+    aliases: ['New Delhi', 'Old Delhi', 'NCR'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Noida',
+    state: 'Uttar Pradesh',
+    stateCode: 'UP',
+    region: 'North',
+    latitude: 28.5355,
+    longitude: 77.3910,
+    aliases: ['Noida', 'Greater Noida', 'Noida Extension'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Greater Noida',
+    state: 'Uttar Pradesh',
+    stateCode: 'UP',
+    region: 'North',
+    latitude: 28.4744,
+    longitude: 77.5040,
+    aliases: ['Greater Noida', 'Gr Noida', 'Yamuna Expressway'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Gurugram',
+    state: 'Haryana',
+    stateCode: 'HR',
+    region: 'North',
+    latitude: 28.4595,
+    longitude: 77.0266,
+    aliases: ['Gurgaon', 'Gurugram', 'Cyber City', 'Manesar'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Faridabad',
+    state: 'Haryana',
+    stateCode: 'HR',
+    region: 'North',
+    latitude: 28.4089,
+    longitude: 77.3178,
+    aliases: ['Faridabad', 'Ballabhgarh'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Ghaziabad',
+    state: 'Uttar Pradesh',
+    stateCode: 'UP',
+    region: 'North',
+    latitude: 28.6692,
+    longitude: 77.4538,
+    aliases: ['Ghaziabad', 'Indirapuram', 'Vaishali'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Agra',
+    state: 'Uttar Pradesh',
+    stateCode: 'UP',
+    region: 'North',
+    latitude: 27.1767,
+    longitude: 78.0081,
+    aliases: ['Agra', 'Taj Mahal', 'Fatehpur Sikri'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Mathura',
+    state: 'Uttar Pradesh',
+    stateCode: 'UP',
+    region: 'North',
+    latitude: 27.4924,
+    longitude: 77.6737,
+    aliases: ['Mathura', 'Braj'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Vrindavan',
+    state: 'Uttar Pradesh',
+    stateCode: 'UP',
+    region: 'North',
+    latitude: 27.5806,
+    longitude: 77.7006,
+    aliases: ['Vrindavan', 'Brindavan', 'Banke Bihari', 'Prem Mandir'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Jaipur',
+    state: 'Rajasthan',
+    stateCode: 'RJ',
+    region: 'North',
+    latitude: 26.9124,
+    longitude: 75.7873,
+    aliases: ['Jaipur', 'Pink City', 'JAI Airport'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Udaipur',
+    state: 'Rajasthan',
+    stateCode: 'RJ',
+    region: 'North',
+    latitude: 24.5854,
+    longitude: 73.7125,
+    aliases: ['Udaipur', 'City of Lakes'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Jodhpur',
+    state: 'Rajasthan',
+    stateCode: 'RJ',
+    region: 'North',
+    latitude: 26.2389,
+    longitude: 73.0243,
+    aliases: ['Jodhpur', 'Blue City'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Ajmer',
+    state: 'Rajasthan',
+    stateCode: 'RJ',
+    region: 'North',
+    latitude: 26.4499,
+    longitude: 74.6399,
+    aliases: ['Ajmer', 'Dargah Sharif'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Pushkar',
+    state: 'Rajasthan',
+    stateCode: 'RJ',
+    region: 'North',
+    latitude: 26.4897,
+    longitude: 74.5511,
+    aliases: ['Pushkar', 'Brahma Temple'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Chandigarh',
+    state: 'Chandigarh',
+    stateCode: 'CH',
+    region: 'North',
+    latitude: 30.7333,
+    longitude: 76.7794,
+    aliases: ['Chandigarh', 'Tricity', 'IXC Airport'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Mohali',
+    state: 'Punjab',
+    stateCode: 'PB',
+    region: 'North',
+    latitude: 30.7046,
+    longitude: 76.7179,
+    aliases: ['Mohali', 'SAS Nagar'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Panchkula',
+    state: 'Haryana',
+    stateCode: 'HR',
+    region: 'North',
+    latitude: 30.6942,
+    longitude: 76.8606,
+    aliases: ['Panchkula'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Amritsar',
+    state: 'Punjab',
+    stateCode: 'PB',
+    region: 'North',
+    latitude: 31.6340,
+    longitude: 74.8723,
+    aliases: ['Amritsar', 'Golden Temple', 'ATQ Airport', 'Wagah Border'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Jalandhar',
+    state: 'Punjab',
+    stateCode: 'PB',
+    region: 'North',
+    latitude: 31.3260,
+    longitude: 75.5762,
+    aliases: ['Jalandhar'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Ludhiana',
+    state: 'Punjab',
+    stateCode: 'PB',
+    region: 'North',
+    latitude: 30.9010,
+    longitude: 75.8573,
+    aliases: ['Ludhiana'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Patiala',
+    state: 'Punjab',
+    stateCode: 'PB',
+    region: 'North',
+    latitude: 30.3398,
+    longitude: 76.3869,
+    aliases: ['Patiala'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Dehradun',
+    state: 'Uttarakhand',
+    stateCode: 'UK',
+    region: 'North',
+    latitude: 30.3165,
+    longitude: 78.0322,
+    aliases: ['Dehradun', 'Jolly Grant', 'DED'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Haridwar',
+    state: 'Uttarakhand',
+    stateCode: 'UK',
+    region: 'North',
+    latitude: 29.9457,
+    longitude: 78.1642,
+    aliases: ['Haridwar', 'Hardwar', 'Har Ki Pauri'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Rishikesh',
+    state: 'Uttarakhand',
+    stateCode: 'UK',
+    region: 'North',
+    latitude: 30.0869,
+    longitude: 78.2676,
+    aliases: ['Rishikesh', 'Hrishikesh', 'Tapovan', 'Laxman Jhula'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Mussoorie',
+    state: 'Uttarakhand',
+    stateCode: 'UK',
+    region: 'North',
+    latitude: 30.4598,
+    longitude: 78.0644,
+    aliases: ['Mussoorie', 'Queen of Hills'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Nainital',
+    state: 'Uttarakhand',
+    stateCode: 'UK',
+    region: 'North',
+    latitude: 29.3919,
+    longitude: 79.4542,
+    aliases: ['Nainital', 'Naini Lake'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Badrinath',
+    state: 'Uttarakhand',
+    stateCode: 'UK',
+    region: 'North',
+    latitude: 30.7433,
+    longitude: 79.4938,
+    aliases: ['Badrinath', 'Badri Dham', 'Char Dham Badrinath', 'Badrinath Temple'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Kedarnath',
+    state: 'Uttarakhand',
+    stateCode: 'UK',
+    region: 'North',
+    latitude: 30.7346,
+    longitude: 79.0669,
+    aliases: ['Kedarnath', 'Kedar Dham', 'Char Dham Kedarnath', 'Gaurikund'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Uttarkashi',
+    state: 'Uttarakhand',
+    stateCode: 'UK',
+    region: 'North',
+    latitude: 30.7268,
+    longitude: 78.4354,
+    aliases: ['Uttarkashi', 'Gangotri Route'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Joshimath',
+    state: 'Uttarakhand',
+    stateCode: 'UK',
+    region: 'North',
+    latitude: 30.5574,
+    longitude: 79.5663,
+    aliases: ['Joshimath', 'Jyotirmath', 'Auli Base'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Shimla',
+    state: 'Himachal Pradesh',
+    stateCode: 'HP',
+    region: 'North',
+    latitude: 31.1048,
+    longitude: 77.1734,
+    aliases: ['Shimla', 'Simla', 'Mall Road'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Manali',
+    state: 'Himachal Pradesh',
+    stateCode: 'HP',
+    region: 'North',
+    latitude: 32.2432,
+    longitude: 77.1892,
+    aliases: ['Manali', 'Kullu Manali', 'Solang Valley'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Dharamshala',
+    state: 'Himachal Pradesh',
+    stateCode: 'HP',
+    region: 'North',
+    latitude: 32.2190,
+    longitude: 76.3234,
+    aliases: ['Dharamshala', 'McLeod Ganj'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Kullu',
+    state: 'Himachal Pradesh',
+    stateCode: 'HP',
+    region: 'North',
+    latitude: 31.9579,
+    longitude: 77.1095,
+    aliases: ['Kullu', 'Bhuntar Airport'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Jammu',
+    state: 'Jammu and Kashmir',
+    stateCode: 'JK',
+    region: 'North',
+    latitude: 32.7266,
+    longitude: 74.8570,
+    aliases: ['Jammu', 'Jammu Tawi'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Katra',
+    state: 'Jammu and Kashmir',
+    stateCode: 'JK',
+    region: 'North',
+    latitude: 32.9921,
+    longitude: 74.9317,
+    aliases: ['Katra', 'Vaishno Devi'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Srinagar',
+    state: 'Jammu and Kashmir',
+    stateCode: 'JK',
+    region: 'North',
+    latitude: 34.0837,
+    longitude: 74.7973,
+    aliases: ['Srinagar', 'Dal Lake', 'SXR Airport'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Bengaluru',
+    state: 'Karnataka',
+    stateCode: 'KA',
+    region: 'South',
+    latitude: 12.9716,
+    longitude: 77.5946,
+    aliases: ['Bangalore', 'Bengaluru', 'BLR Airport', 'Electronic City', 'Whitefield'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Mysuru',
+    state: 'Karnataka',
+    stateCode: 'KA',
+    region: 'South',
+    latitude: 12.2958,
+    longitude: 76.6394,
+    aliases: ['Mysore', 'Mysuru'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Mangalore',
+    state: 'Karnataka',
+    stateCode: 'KA',
+    region: 'South',
+    latitude: 12.9141,
+    longitude: 74.8560,
+    aliases: ['Mangalore', 'Mangaluru'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Hubli',
+    state: 'Karnataka',
+    stateCode: 'KA',
+    region: 'South',
+    latitude: 15.3647,
+    longitude: 75.1240,
+    aliases: ['Hubli', 'Hubballi', 'Dharwad'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Coorg',
+    state: 'Karnataka',
+    stateCode: 'KA',
+    region: 'South',
+    latitude: 12.3375,
+    longitude: 75.8069,
+    aliases: ['Coorg', 'Madikeri'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Chennai',
+    state: 'Tamil Nadu',
+    stateCode: 'TN',
+    region: 'South',
+    latitude: 13.0827,
+    longitude: 80.2707,
+    aliases: ['Chennai', 'Madras', 'MAA Airport'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Coimbatore',
+    state: 'Tamil Nadu',
+    stateCode: 'TN',
+    region: 'South',
+    latitude: 11.0168,
+    longitude: 76.9558,
+    aliases: ['Coimbatore', 'Kovai'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Madurai',
+    state: 'Tamil Nadu',
+    stateCode: 'TN',
+    region: 'South',
+    latitude: 9.9252,
+    longitude: 78.1198,
+    aliases: ['Madurai', 'Meenakshi Temple'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Salem',
+    state: 'Tamil Nadu',
+    stateCode: 'TN',
+    region: 'South',
+    latitude: 11.6643,
+    longitude: 78.1460,
+    aliases: ['Salem'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Ooty',
+    state: 'Tamil Nadu',
+    stateCode: 'TN',
+    region: 'South',
+    latitude: 11.4102,
+    longitude: 76.6950,
+    aliases: ['Ooty', 'Udhagamandalam', 'Nilgiris'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Kodaikanal',
+    state: 'Tamil Nadu',
+    stateCode: 'TN',
+    region: 'South',
+    latitude: 10.2381,
+    longitude: 77.4892,
+    aliases: ['Kodaikanal', 'Kodai'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Hyderabad',
+    state: 'Telangana',
+    stateCode: 'TS',
+    region: 'South',
+    latitude: 17.3850,
+    longitude: 78.4867,
+    aliases: ['Hyderabad', 'Secunderabad', 'HYD Airport', 'Cyberabad', 'Gachibowli'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Warangal',
+    state: 'Telangana',
+    stateCode: 'TS',
+    region: 'South',
+    latitude: 17.9689,
+    longitude: 79.5941,
+    aliases: ['Warangal', 'Kazipet'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Vijayawada',
+    state: 'Andhra Pradesh',
+    stateCode: 'AP',
+    region: 'South',
+    latitude: 16.5062,
+    longitude: 80.6480,
+    aliases: ['Vijayawada', 'Amaravati'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Visakhapatnam',
+    state: 'Andhra Pradesh',
+    stateCode: 'AP',
+    region: 'South',
+    latitude: 17.6868,
+    longitude: 83.2185,
+    aliases: ['Visakhapatnam', 'Vizag', 'VTZ'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Tirupati',
+    state: 'Andhra Pradesh',
+    stateCode: 'AP',
+    region: 'South',
+    latitude: 13.6288,
+    longitude: 79.4192,
+    aliases: ['Tirupati', 'Tirumala', 'Balaji Temple'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Kochi',
+    state: 'Kerala',
+    stateCode: 'KL',
+    region: 'South',
+    latitude: 9.9312,
+    longitude: 76.2673,
+    aliases: ['Kochi', 'Cochin', 'Ernakulam', 'COK Airport'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Thiruvananthapuram',
+    state: 'Kerala',
+    stateCode: 'KL',
+    region: 'South',
+    latitude: 8.5241,
+    longitude: 76.9366,
+    aliases: ['Thiruvananthapuram', 'Trivandrum', 'TRV Airport', 'Kovalam'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Kozhikode',
+    state: 'Kerala',
+    stateCode: 'KL',
+    region: 'South',
+    latitude: 11.2588,
+    longitude: 75.7804,
+    aliases: ['Kozhikode', 'Calicut'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Munnar',
+    state: 'Kerala',
+    stateCode: 'KL',
+    region: 'South',
+    latitude: 10.0889,
+    longitude: 77.0595,
+    aliases: ['Munnar', 'Tea Gardens'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Alleppey',
+    state: 'Kerala',
+    stateCode: 'KL',
+    region: 'South',
+    latitude: 9.4981,
+    longitude: 76.3388,
+    aliases: ['Alleppey', 'Alappuzha', 'Backwaters'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Pondicherry',
+    state: 'Puducherry',
+    stateCode: 'PY',
+    region: 'South',
+    latitude: 11.9416,
+    longitude: 79.8083,
+    aliases: ['Puducherry', 'Pondicherry', 'Auroville'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Mumbai',
+    state: 'Maharashtra',
+    stateCode: 'MH',
+    region: 'West',
+    latitude: 19.0760,
+    longitude: 72.8777,
+    aliases: ['Mumbai', 'Bombay', 'BOM Airport', 'Navi Mumbai', 'Thane', 'Andheri'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Pune',
+    state: 'Maharashtra',
+    stateCode: 'MH',
+    region: 'West',
+    latitude: 18.5204,
+    longitude: 73.8567,
+    aliases: ['Pune', 'Poona', 'PNQ Airport', 'Hinjawadi', 'Pimpri Chinchwad'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Nashik',
+    state: 'Maharashtra',
+    stateCode: 'MH',
+    region: 'West',
+    latitude: 19.9975,
+    longitude: 73.7898,
+    aliases: ['Nashik', 'Nasik', 'Trimbakeshwar'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Shirdi',
+    state: 'Maharashtra',
+    stateCode: 'MH',
+    region: 'West',
+    latitude: 19.7645,
+    longitude: 74.4762,
+    aliases: ['Shirdi', 'Sai Baba Temple'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Lonavala',
+    state: 'Maharashtra',
+    stateCode: 'MH',
+    region: 'West',
+    latitude: 18.7557,
+    longitude: 73.4091,
+    aliases: ['Lonavala', 'Khandala'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Mahabaleshwar',
+    state: 'Maharashtra',
+    stateCode: 'MH',
+    region: 'West',
+    latitude: 17.9237,
+    longitude: 73.6586,
+    aliases: ['Mahabaleshwar', 'Panchgani'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Nagpur',
+    state: 'Maharashtra',
+    stateCode: 'MH',
+    region: 'Central',
+    latitude: 21.1458,
+    longitude: 79.0882,
+    aliases: ['Nagpur', 'Orange City'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Aurangabad',
+    state: 'Maharashtra',
+    stateCode: 'MH',
+    region: 'West',
+    latitude: 19.8762,
+    longitude: 75.3433,
+    aliases: ['Aurangabad', 'Chhatrapati Sambhajinagar', 'Ajanta Ellora'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Ahmedabad',
+    state: 'Gujarat',
+    stateCode: 'GJ',
+    region: 'West',
+    latitude: 23.0225,
+    longitude: 72.5714,
+    aliases: ['Ahmedabad', 'Amdavad', 'AMD Airport', 'Gandhinagar'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Surat',
+    state: 'Gujarat',
+    stateCode: 'GJ',
+    region: 'West',
+    latitude: 21.1702,
+    longitude: 72.8311,
+    aliases: ['Surat', 'Diamond City'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Vadodara',
+    state: 'Gujarat',
+    stateCode: 'GJ',
+    region: 'West',
+    latitude: 22.3072,
+    longitude: 73.1812,
+    aliases: ['Vadodara', 'Baroda'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Rajkot',
+    state: 'Gujarat',
+    stateCode: 'GJ',
+    region: 'West',
+    latitude: 22.3039,
+    longitude: 70.8022,
+    aliases: ['Rajkot'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Somnath',
+    state: 'Gujarat',
+    stateCode: 'GJ',
+    region: 'West',
+    latitude: 20.8880,
+    longitude: 70.4012,
+    aliases: ['Somnath', 'Veraval', 'Somnath Temple'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Dwarka',
+    state: 'Gujarat',
+    stateCode: 'GJ',
+    region: 'West',
+    latitude: 22.2442,
+    longitude: 68.9685,
+    aliases: ['Dwarka', 'Dwarkadhish Temple'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Panaji',
+    state: 'Goa',
+    stateCode: 'GA',
+    region: 'West',
+    latitude: 15.4909,
+    longitude: 73.8278,
+    aliases: ['Goa', 'Panaji', 'Panjim', 'North Goa'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Candolim',
+    state: 'Goa',
+    stateCode: 'GA',
+    region: 'West',
+    latitude: 15.5178,
+    longitude: 73.7630,
+    aliases: ['Candolim', 'North Goa Beach', 'Fort Aguada'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Calangute',
+    state: 'Goa',
+    stateCode: 'GA',
+    region: 'West',
+    latitude: 15.5439,
+    longitude: 73.7553,
+    aliases: ['Calangute', 'Baga', 'Anjuna'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Manohar International Airport',
+    state: 'Goa',
+    stateCode: 'GA',
+    region: 'West',
+    latitude: 15.7483,
+    longitude: 73.8647,
+    aliases: ['Manohar International Airport', 'GOX', 'Mopa Airport', 'Mopa Goa Airport'],
+    terrainCategory: 'AIRPORT_HUB'
+  },
+  {
+    name: 'Margao',
+    state: 'Goa',
+    stateCode: 'GA',
+    region: 'West',
+    latitude: 15.2736,
+    longitude: 73.9582,
+    aliases: ['Margao', 'Madgaon', 'South Goa'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Vasco da Gama',
+    state: 'Goa',
+    stateCode: 'GA',
+    region: 'West',
+    latitude: 15.3982,
+    longitude: 73.8113,
+    aliases: ['Vasco da Gama', 'Dabolim Airport', 'GOI'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Kolkata',
+    state: 'West Bengal',
+    stateCode: 'WB',
+    region: 'East',
+    latitude: 22.5726,
+    longitude: 88.3639,
+    aliases: ['Kolkata', 'Calcutta', 'CCU Airport', 'Howrah', 'Salt Lake'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Siliguri',
+    state: 'West Bengal',
+    stateCode: 'WB',
+    region: 'East',
+    latitude: 26.7271,
+    longitude: 88.3953,
+    aliases: ['Siliguri', 'Bagdogra Airport', 'IXB'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Darjeeling',
+    state: 'West Bengal',
+    stateCode: 'WB',
+    region: 'East',
+    latitude: 27.0410,
+    longitude: 88.2663,
+    aliases: ['Darjeeling', 'Queen of the Hills Darjeeling'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Digha',
+    state: 'West Bengal',
+    stateCode: 'WB',
+    region: 'East',
+    latitude: 21.6266,
+    longitude: 87.5075,
+    aliases: ['Digha', 'Mandarmani'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Bhubaneswar',
+    state: 'Odisha',
+    stateCode: 'OD',
+    region: 'East',
+    latitude: 20.2961,
+    longitude: 85.8245,
+    aliases: ['Bhubaneswar', 'Temple City', 'BBI Airport'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Puri',
+    state: 'Odisha',
+    stateCode: 'OD',
+    region: 'East',
+    latitude: 19.8135,
+    longitude: 85.8312,
+    aliases: ['Puri', 'Jagannath Dham'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Cuttack',
+    state: 'Odisha',
+    stateCode: 'OD',
+    region: 'East',
+    latitude: 20.4625,
+    longitude: 85.8828,
+    aliases: ['Cuttack', 'Silver City'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Patna',
+    state: 'Bihar',
+    stateCode: 'BR',
+    region: 'East',
+    latitude: 25.5941,
+    longitude: 85.1376,
+    aliases: ['Patna', 'PAT Airport'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Gaya',
+    state: 'Bihar',
+    stateCode: 'BR',
+    region: 'East',
+    latitude: 24.7914,
+    longitude: 85.0002,
+    aliases: ['Gaya', 'Bodh Gaya'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Ranchi',
+    state: 'Jharkhand',
+    stateCode: 'JH',
+    region: 'East',
+    latitude: 23.3441,
+    longitude: 85.3096,
+    aliases: ['Ranchi', 'IXR Airport'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Jamshedpur',
+    state: 'Jharkhand',
+    stateCode: 'JH',
+    region: 'East',
+    latitude: 22.8046,
+    longitude: 86.2029,
+    aliases: ['Jamshedpur', 'Tatanagar'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Bhopal',
+    state: 'Madhya Pradesh',
+    stateCode: 'MP',
+    region: 'Central',
+    latitude: 23.2599,
+    longitude: 77.4126,
+    aliases: ['Bhopal', 'BHO Airport'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Indore',
+    state: 'Madhya Pradesh',
+    stateCode: 'MP',
+    region: 'Central',
+    latitude: 22.7196,
+    longitude: 75.8577,
+    aliases: ['Indore', 'IDR Airport'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Ujjain',
+    state: 'Madhya Pradesh',
+    stateCode: 'MP',
+    region: 'Central',
+    latitude: 23.1765,
+    longitude: 75.7885,
+    aliases: ['Ujjain', 'Mahakaleshwar'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Gwalior',
+    state: 'Madhya Pradesh',
+    stateCode: 'MP',
+    region: 'Central',
+    latitude: 26.2183,
+    longitude: 78.1828,
+    aliases: ['Gwalior', 'GWL'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Jabalpur',
+    state: 'Madhya Pradesh',
+    stateCode: 'MP',
+    region: 'Central',
+    latitude: 23.1815,
+    longitude: 79.9864,
+    aliases: ['Jabalpur', 'Bhedaghat'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Raipur',
+    state: 'Chhattisgarh',
+    stateCode: 'CG',
+    region: 'Central',
+    latitude: 21.2514,
+    longitude: 81.6296,
+    aliases: ['Raipur', 'RPR Airport', 'Nava Raipur'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Bilaspur',
+    state: 'Chhattisgarh',
+    stateCode: 'CG',
+    region: 'Central',
+    latitude: 22.0797,
+    longitude: 82.1409,
+    aliases: ['Bilaspur'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Guwahati',
+    state: 'Assam',
+    stateCode: 'AS',
+    region: 'Northeast',
+    latitude: 26.1445,
+    longitude: 91.7362,
+    aliases: ['Guwahati', 'Gauhati', 'GAU Airport', 'Kamakhya'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Shillong',
+    state: 'Meghalaya',
+    stateCode: 'ML',
+    region: 'Northeast',
+    latitude: 25.5788,
+    longitude: 91.8933,
+    aliases: ['Shillong', 'Scotland of the East'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Gangtok',
+    state: 'Sikkim',
+    stateCode: 'SK',
+    region: 'Northeast',
+    latitude: 27.3389,
+    longitude: 88.6065,
+    aliases: ['Gangtok', 'Sikkim'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  },
+  {
+    name: 'Kaziranga',
+    state: 'Assam',
+    stateCode: 'AS',
+    region: 'Northeast',
+    latitude: 26.5775,
+    longitude: 93.1711,
+    aliases: ['Kaziranga', 'Kaziranga National Park'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Imphal',
+    state: 'Manipur',
+    stateCode: 'MN',
+    region: 'Northeast',
+    latitude: 24.8170,
+    longitude: 93.9368,
+    aliases: ['Imphal', 'IMF Airport'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Agartala',
+    state: 'Tripura',
+    stateCode: 'TR',
+    region: 'Northeast',
+    latitude: 23.8315,
+    longitude: 91.2868,
+    aliases: ['Agartala', 'IXA Airport'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Dimapur',
+    state: 'Nagaland',
+    stateCode: 'NL',
+    region: 'Northeast',
+    latitude: 25.9090,
+    longitude: 93.7267,
+    aliases: ['Dimapur', 'DMU Airport'],
+    terrainCategory: 'STANDARD'
+  },
+  {
+    name: 'Kohima',
+    state: 'Nagaland',
+    stateCode: 'NL',
+    region: 'Northeast',
+    latitude: 25.6751,
+    longitude: 94.1086,
+    aliases: ['Kohima'],
+    terrainCategory: 'HIGH_ALTITUDE'
+  }
+];
+
+const targetPath = path.join(__dirname, 'assets', 'data', 'india-cities.json');
+fs.writeFileSync(targetPath, JSON.stringify(cities, null, 2), 'utf8');
+console.log('Successfully written ' + cities.length + ' cities to ' + targetPath);

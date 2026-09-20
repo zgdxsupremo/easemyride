@@ -1,15 +1,14 @@
 /**
- * MargDrive — Distance & Route Calculation Module
+ * Marg Drive — Distance & Route Calculation Module (distance.js)
  * 
  * Abstraction layer for calculating real driving distances between Indian cities.
  * Integrates with Google Routes API / Google Distance Matrix when configured,
- * and provides a comprehensive Indian intercity distance matrix + intelligent
- * geographical routing fallback for development and offline operation.
+ * and provides a comprehensive Indian intercity distance matrix + CitySearch dataset
+ * coordinates routing fallback for development and offline operation.
  */
 
 const DistanceService = (() => {
   // Built-in Indian Intercity Road Distance Matrix (in KM)
-  // Curated road distances between prominent hubs across India
   const DISTANCE_MATRIX = {
     "delhi-chandigarh": 250,
     "chandigarh-delhi": 250,
@@ -17,6 +16,10 @@ const DistanceService = (() => {
     "jaipur-delhi": 280,
     "delhi-agra": 210,
     "agra-delhi": 210,
+    "delhi-vrindavan": 180,
+    "vrindavan-delhi": 180,
+    "new delhi-vrindavan": 180,
+    "vrindavan-new delhi": 180,
     "amritsar-chandigarh": 230,
     "chandigarh-amritsar": 230,
     "delhi-amritsar": 450,
@@ -31,6 +34,12 @@ const DistanceService = (() => {
     "haridwar-delhi": 220,
     "delhi-rishikesh": 240,
     "rishikesh-delhi": 240,
+    "delhi-badrinath": 540,
+    "badrinath-delhi": 540,
+    "rishikesh-badrinath": 295,
+    "badrinath-rishikesh": 295,
+    "delhi-kedarnath": 450,
+    "kedarnath-delhi": 450,
     "delhi-manali": 530,
     "manali-delhi": 530,
     "chandigarh-manali": 300,
@@ -76,50 +85,11 @@ const DistanceService = (() => {
     "kolkata-digha": 185,
     "digha-kolkata": 185,
     "kolkata-mandarmani": 170,
-    "mandarmani-kolkata": 170
-  };
-
-  // Indian Hub Coordinates for Geodesic Estimation Fallback
-  const CITY_COORDINATES = {
-    "delhi": { lat: 28.6139, lng: 77.2090 },
-    "new delhi": { lat: 28.6139, lng: 77.2090 },
-    "noida": { lat: 28.5355, lng: 77.3910 },
-    "gurgaon": { lat: 28.4595, lng: 77.0266 },
-    "gurugram": { lat: 28.4595, lng: 77.0266 },
-    "chandigarh": { lat: 30.7333, lng: 76.7794 },
-    "amritsar": { lat: 31.6340, lng: 74.8723 },
-    "jaipur": { lat: 26.9124, lng: 75.7873 },
-    "agra": { lat: 27.1767, lng: 78.0081 },
-    "shimla": { lat: 31.1048, lng: 77.1734 },
-    "manali": { lat: 32.2432, lng: 77.1892 },
-    "dehradun": { lat: 30.3165, lng: 78.0322 },
-    "haridwar": { lat: 29.9457, lng: 78.1642 },
-    "rishikesh": { lat: 30.0869, lng: 78.2676 },
-    "lucknow": { lat: 26.8467, lng: 80.9462 },
-    "kanpur": { lat: 26.4499, lng: 80.3319 },
-    "varanasi": { lat: 25.3176, lng: 82.9739 },
-    "mumbai": { lat: 19.0760, lng: 72.8777 },
-    "pune": { lat: 18.5204, lng: 73.8567 },
-    "nashik": { lat: 19.9975, lng: 73.7898 },
-    "shirdi": { lat: 19.7667, lng: 74.4770 },
-    "goa": { lat: 15.2993, lng: 74.1240 },
-    "bengaluru": { lat: 12.9716, lng: 77.5946 },
-    "bangalore": { lat: 12.9716, lng: 77.5946 },
-    "mysuru": { lat: 12.2958, lng: 76.6394 },
-    "mysore": { lat: 12.2958, lng: 76.6394 },
-    "chennai": { lat: 13.0827, lng: 80.2707 },
-    "hyderabad": { lat: 17.3850, lng: 78.4867 },
-    "kolkata": { lat: 22.5726, lng: 88.3639 },
-    "ahmedabad": { lat: 23.0225, lng: 72.5714 },
-    "surat": { lat: 21.1702, lng: 72.8311 },
-    "patna": { lat: 25.5941, lng: 85.1376 },
-    "bhopal": { lat: 23.2599, lng: 77.4126 },
-    "indore": { lat: 22.7196, lng: 75.8577 },
-    "jodhpur": { lat: 26.2389, lng: 73.0243 },
-    "udaipur": { lat: 24.5854, lng: 73.7125 },
-    "cochin": { lat: 9.9312, lng: 76.2673 },
-    "kochi": { lat: 9.9312, lng: 76.2673 },
-    "trivandrum": { lat: 8.5241, lng: 76.9366 }
+    "mandarmani-kolkata": 170,
+    "manohar international airport-candolim": 38,
+    "candolim-manohar international airport": 38,
+    "gox-candolim": 38,
+    "candolim-gox": 38
   };
 
   /**
@@ -129,22 +99,37 @@ const DistanceService = (() => {
     if (!name) return "";
     return name.toLowerCase()
       .replace(/[,.-]/g, " ")
-      .split(" ")
-      .filter(Boolean)[0] || "";
+      .trim();
   }
 
+  let _citySearchModule = null;
+  try {
+    if (typeof require !== "undefined") {
+      _citySearchModule = require('./city-search');
+    }
+  } catch (e) {}
+
   /**
-   * Calculates approximate road distance using Haversine distance * road tortuosity factor (1.28x)
+   * Calculates approximate road distance using Haversine distance * road factor (1.28x)
    */
   function estimateDistanceByCoordinates(origin, destination) {
-    const origNorm = normalizeCityName(origin);
-    const destNorm = normalizeCityName(destination);
-    const c1 = CITY_COORDINATES[origNorm];
-    const c2 = CITY_COORDINATES[destNorm];
+    let c1 = null;
+    let c2 = null;
+
+    const cs = (typeof CitySearch !== "undefined" && CitySearch) || (typeof window !== "undefined" && window.CitySearch) || (typeof global !== "undefined" && global.CitySearch) || _citySearchModule;
+    if (cs && typeof cs.getCityByName === "function") {
+      const city1 = cs.getCityByName(origin);
+      const city2 = cs.getCityByName(destination);
+      if (city1 && city1.latitude && city1.longitude) {
+        c1 = { lat: city1.latitude, lng: city1.longitude };
+      }
+      if (city2 && city2.latitude && city2.longitude) {
+        c2 = { lat: city2.latitude, lng: city2.longitude };
+      }
+    }
 
     if (!c1 || !c2) {
-      // Default standard intercity trip fallback when unknown custom locations are provided
-      return 220;
+      return 220; // Sensible default fallback
     }
 
     const R = 6371; // Earth radius in KM
@@ -177,23 +162,13 @@ const DistanceService = (() => {
   }
 
   /**
-   * Primary Distance Calculation Abstraction.
-   * 
-   * Returns:
-   * {
-   *   distanceKm: number,
-   *   duration: string,
-   *   origin: string,
-   *   destination: string,
-   *   isLiveApi: boolean
-   * }
-   * 
+   * Primary Road Distance Calculation Abstraction.
    * @param {string} origin
    * @param {string} destination
    * @param {string} serviceType
    * @returns {Promise<object>}
    */
-  async function calculateDistance(origin, destination, serviceType = "oneway") {
+  async function calculateRoadDistance(origin, destination, serviceType = "oneway") {
     const origClean = (origin || "").trim();
     const destClean = (destination || "").trim();
 
@@ -205,6 +180,7 @@ const DistanceService = (() => {
     if (serviceType === "local") {
       return {
         distanceKm: 80,
+        durationMinutes: 480,
         duration: "8 hrs package",
         origin: origClean,
         destination: "Local City Tour",
@@ -214,8 +190,11 @@ const DistanceService = (() => {
 
     // Handle Airport Transfer
     if (serviceType === "airport") {
+      const isGOX = origClean.toLowerCase().includes("manohar") || origClean.toLowerCase().includes("gox") || (destClean && (destClean.toLowerCase().includes("manohar") || destClean.toLowerCase().includes("gox")));
+      const dist = isGOX ? 38 : 35;
       return {
-        distanceKm: 35,
+        distanceKm: dist,
+        durationMinutes: 75,
         duration: "1 hr 15 mins",
         origin: origClean,
         destination: destClean || "Airport Terminal",
@@ -227,7 +206,7 @@ const DistanceService = (() => {
       throw new Error("Drop location is required for intercity trips.");
     }
 
-    // 1. Check if Google Maps API Key is configured for real live routing
+    // 1. Google Maps Routes API if configured
     if (typeof window !== "undefined" && window.MargDriveConfig && window.MargDriveConfig.googleMapsApiKey && typeof google !== "undefined" && google.maps) {
       try {
         const matrixService = new google.maps.DistanceMatrixService();
@@ -246,8 +225,10 @@ const DistanceService = (() => {
         if (response.rows && response.rows[0] && response.rows[0].elements[0] && response.rows[0].elements[0].status === "OK") {
           const element = response.rows[0].elements[0];
           const distKm = Math.round(element.distance.value / 1000);
+          const durationMins = Math.round(element.duration.value / 60);
           return {
             distanceKm: distKm,
+            durationMinutes: durationMins,
             duration: element.duration.text,
             origin: response.originAddresses[0] || origClean,
             destination: response.destinationAddresses[0] || destClean,
@@ -260,8 +241,12 @@ const DistanceService = (() => {
     }
 
     // 2. Matrix Lookup
-    const key = `${normalizeCityName(origClean)}-${normalizeCityName(destClean)}`;
-    let distanceKm = DISTANCE_MATRIX[key];
+    const normOrig = normalizeCityName(origClean);
+    const normDest = normalizeCityName(destClean);
+    const key1 = `${normOrig}-${normDest}`;
+    const key2 = `${origClean.toLowerCase().replace(/ delhi/g, '')}-${destClean.toLowerCase().replace(/ delhi/g, '')}`;
+
+    let distanceKm = DISTANCE_MATRIX[key1] || DISTANCE_MATRIX[key2];
 
     if (!distanceKm) {
       // 3. Coordinate Estimation Fallback
@@ -269,9 +254,11 @@ const DistanceService = (() => {
     }
 
     const duration = formatDuration(distanceKm);
+    const totalMinutes = Math.round((distanceKm / 55) * 60) + 15;
 
     return {
       distanceKm: distanceKm,
+      durationMinutes: totalMinutes,
       duration: duration,
       origin: origClean,
       destination: destClean,
@@ -280,7 +267,11 @@ const DistanceService = (() => {
     };
   }
 
+  // Alias calculateDistance to calculateRoadDistance
+  const calculateDistance = calculateRoadDistance;
+
   return {
+    calculateRoadDistance,
     calculateDistance,
     formatDuration,
     estimateDistanceByCoordinates,

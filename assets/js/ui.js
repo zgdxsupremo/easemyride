@@ -269,7 +269,7 @@ const UI = (() => {
               <path d="M9 17h6"/>
               <circle cx="17" cy="17" r="2"/>
             </svg>
-            <span>Marg<span class="highlight">Drive</span></span>
+            <span>Marg <span class="highlight">Drive</span></span>
           </a>
 
           <ul class="nav-links">
@@ -314,7 +314,7 @@ const UI = (() => {
         <div class="footer-top">
           <div class="container footer-grid">
             <div class="footer-brand">
-              <div class="footer-logo">Marg<span class="highlight" style="color:var(--accent);">Drive</span></div>
+              <div class="footer-logo">Marg <span class="highlight" style="color:var(--accent);">Drive</span></div>
               <p class="footer-tagline">India's Premier On-Demand Intercity & Airport Cab Service. Professional chauffeurs, transparent fares, and 24/7 dedicated helpline support.</p>
               <div class="footer-contact-info">
                 <div class="footer-contact-item">
@@ -359,7 +359,7 @@ const UI = (() => {
         </div>
         <div class="footer-bottom">
           <div class="container footer-bottom-flex">
-            <p>© 2026 MargDrive. All rights reserved. Built for seamless travel.</p>
+            <p>© 2026 Marg Drive. All rights reserved. Built for seamless travel.</p>
             <p style="font-size:0.8rem; color:var(--gray-500);">Tolls, parking & applicable taxes extra as per actuals.</p>
           </div>
         </div>
@@ -374,7 +374,7 @@ const UI = (() => {
       drawer.innerHTML = `
         <div class="mobile-nav-header">
           <div class="brand-logo">
-            <span>Ride<span class="highlight">On</span>Demand</span>
+            <span>Marg <span class="highlight">Drive</span></span>
           </div>
           <button class="modal-close-btn" id="close-drawer-btn" aria-label="Close Navigation">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>

@@ -170,7 +170,13 @@ function handleCreateBooking(data) {
     distKm,
     calcSedanFare,
     adjustment,
+    Number(data.regionalAdjustment) || 0,
+    Number(data.specialRouteAdjustment) || 0,
+    data.appliedRules ? (Array.isArray(data.appliedRules) ? data.appliedRules.join(", ") : String(data.appliedRules)) : "STANDARD",
     verifiedFinalFare,
+    data.allocatedDriverVendor || data.allocated_vendor_name || "",
+    data.driverVendorId || data.allocated_vendor_id || "",
+    data.assignedAt || "",
     data.remarks || "",
     generatedSms,
     "READY"
@@ -194,8 +200,8 @@ function handleCreateBooking(data) {
   try {
     var adminEmail = Session.getEffectiveUser().getEmail() || (config && config.adminEmail);
     if (adminEmail) {
-      var emailSubject = "🚗 New MargDrive Booking Alert [" + bookingId + "] — " + route;
-      var emailBody = "Hello Admin,\n\nA new cab booking request has been submitted on MargDrive!\n\n" +
+      var emailSubject = "🚗 New Marg Drive Booking Alert [" + bookingId + "] — " + route;
+      var emailBody = "Hello Admin,\n\nA new cab booking request has been submitted on Marg Drive!\n\n" +
         "• Booking ID: " + bookingId + "\n" +
         "• Customer Name: " + (data.fullName || "N/A") + "\n" +
         "• Phone Number: +91 " + (data.phoneNumber || "N/A") + "\n" +
@@ -206,7 +212,7 @@ function handleCreateBooking(data) {
         "• Pickup Schedule: " + (data.startingDate || "Date") + " at " + (data.startingTime || "Time") + "\n" +
         "• Pickup Address: " + (data.pickupAddress || "N/A") + "\n" +
         "• Remarks: " + (data.remarks || "None") + "\n\n" +
-        "👉 Open your Google Sheet or MargDrive Admin Portal to assign a driver and update status.\n";
+        "👉 Open your Google Sheet or Marg Drive Admin Portal to assign a driver and update status.\n";
       
       MailApp.sendEmail(adminEmail, emailSubject, emailBody);
     }
@@ -276,7 +282,6 @@ function handleGetAdminData() {
   var bookings = [];
   if (bSheet && bSheet.getLastRow() > 1) {
     var bValues = bSheet.getDataRange().getValues();
-    var bHeaders = bValues[0];
     for (var i = 1; i < bValues.length; i++) {
       var obj = {};
       obj.bookingId = bValues[i][0];
@@ -299,10 +304,16 @@ function handleGetAdminData() {
       obj.distanceKm = bValues[i][17];
       obj.baseFare = bValues[i][18];
       obj.vehicleAdjustment = bValues[i][19];
-      obj.finalFare = bValues[i][20];
-      obj.remarks = bValues[i][21];
-      obj.generatedSms = bValues[i][22];
-      obj.smsStatus = bValues[i][23];
+      obj.regionalAdjustment = bValues[i][20];
+      obj.specialRouteAdjustment = bValues[i][21];
+      obj.appliedRules = bValues[i][22];
+      obj.finalFare = bValues[i][23];
+      obj.allocatedDriverVendor = bValues[i][24];
+      obj.driverVendorId = bValues[i][25];
+      obj.assignedAt = bValues[i][26];
+      obj.remarks = bValues[i][27];
+      obj.generatedSms = bValues[i][28];
+      obj.smsStatus = bValues[i][29];
       bookings.unshift(obj);
     }
   }
@@ -435,7 +446,9 @@ function getBookingsHeaders() {
     "Country Code", "Phone Number", "From City", "To City", "Pickup Address",
     "Dropoff Address", "Starting Date", "Starting Time", "Returning Date",
     "Returning Time", "Journey Type", "Car Type", "Distance KM", "Base Fare",
-    "Vehicle Adjustment", "Final Fare", "Remarks", "Generated SMS", "SMS Status"
+    "Vehicle Adjustment", "Regional Adjustment", "Special Route Adjustment", "Applied Rules",
+    "Final Fare", "Allocated Driver/Vendor", "Driver/Vendor ID", "Assigned At",
+    "Remarks", "Customer SMS", "SMS Status"
   ];
 }
 

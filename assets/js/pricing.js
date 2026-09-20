@@ -1,22 +1,19 @@
 /**
- * MargDrive — Core Pricing Engine
+ * Marg Drive — Core Pricing Engine (pricing.js)
  * 
- * Implements transparent, deterministic fare calculations for all vehicle
- * categories across One Way, Round Trip, Local Sightseeing, and Airport Transfers.
- * 
- * Rules:
- * - Sedan Base Formula: (distanceKm * 11) + 400
- * - SUV: Sedan Fare + 3,000
- * - Innova: Sedan Fare + 3,000 (Configurable)
- * - Innova Crysta: Sedan Fare + 4,000
- * - Hatchback: Sedan Fare - 100
- * 
- * Note: Tolls, permits, and parking are NOT included in the base fare.
+ * Implements transparent, deterministic, and configurable fare calculations with:
+ * - Deterministic base formulas across all vehicle categories
+ * - Regional adjustments (e.g. South India 1.05x multiplier)
+ * - Direction-aware High-Altitude / Himalayan route pricing (e.g. mountain descent 1.08x)
+ * - Transparent rule auditing with appliedRules breakdown
  */
 
 const PricingEngine = (() => {
+  // Versioning for tracking & backend sync
+  const PRICING_VERSION = "2026-09-19-v1";
+
   // Configurable base parameters
-  const RATES = {
+  const BASE_RATES = {
     sedanPerKm: 11,
     sedanBaseFare: 400,
     adjustments: {
@@ -28,71 +25,266 @@ const PricingEngine = (() => {
     },
     minimumFare: 800,
     roundTripMinKmPerDay: 250,
-    roundTripDriverAllowancePerDay: 400
+    roundTripDriverAllowancePerDay: 400,
+    roundTripSedanKmRate: 10.5
   };
+
+  // Configurable regional pricing adjustments
+  const REGIONAL_PRICING_RULES = {
+    South: {
+      multiplier: 1.05,
+      ruleCode: "SOUTH_REGION_MULTIPLIER",
+      description: "South India Regional Pricing (5% adjustment)"
+    }
+  };
+
+  // Configurable terrain & mountain route adjustments
+  const HIGH_ALTITUDE_RULES = {
+    HIMALAYAN_DESCENT: {
+      multiplier: 1.08,
+      ruleCode: "HIMALAYAN_DESCENT",
+      description: "Himalayan Mountain Descent Route Adjustment (8%)"
+    },
+    HIGH_ALTITUDE_STANDARD: {
+      multiplier: 1.06,
+      ruleCode: "HIGH_ALTITUDE_STANDARD",
+      description: "High-Altitude Route Adjustment (6%)"
+    }
+  };
+
+  let _citySearchModule = null;
+  try {
+    if (typeof require !== "undefined") {
+      _citySearchModule = require('./city-search');
+    }
+  } catch (e) {}
+
+  /**
+   * Helper to lookup city metadata (using CitySearch if available)
+   */
+  function getCityMeta(cityName) {
+    if (!cityName) return null;
+    const cs = (typeof CitySearch !== "undefined" && CitySearch) || (typeof window !== "undefined" && window.CitySearch) || (typeof global !== "undefined" && global.CitySearch) || _citySearchModule;
+    if (cs && typeof cs.getCityByName === "function") {
+      return cs.getCityByName(cityName);
+    }
+    // Fallback basic terrain check
+    const highAltNames = [
+      "badrinath", "kedarnath", "uttarkashi", "joshimath", "rishikesh",
+      "mussoorie", "nainital", "shimla", "manali", "dharamshala", "kullu",
+      "katra", "srinagar", "darjeeling", "shillong", "gangtok", "munnar",
+      "ooty", "kodaikanal", "coorg", "lonavala", "mahabaleshwar"
+    ];
+    const nameLower = cityName.toLowerCase();
+    const isHigh = highAltNames.some(h => nameLower.includes(h));
+    return {
+      name: cityName,
+      region: "North",
+      terrainCategory: isHigh ? "HIGH_ALTITUDE" : "STANDARD"
+    };
+  }
+
+  /**
+   * Classifies a route to determine terrain and regional directionality.
+   * @param {string|object} origin 
+   * @param {string|object} destination 
+   * @returns {object} Classification outcome
+   */
+  function classifyRoute(origin, destination) {
+    const originMeta = typeof origin === "object" && origin ? origin : getCityMeta(origin);
+    const destMeta = typeof destination === "object" && destination ? destination : getCityMeta(destination);
+
+    const originRegion = originMeta ? originMeta.region : "North";
+    const destRegion = destMeta ? destMeta.region : "North";
+    const originTerrain = originMeta ? originMeta.terrainCategory : "STANDARD";
+    const destTerrain = destMeta ? destMeta.terrainCategory : "STANDARD";
+
+    let regionalRule = null;
+    let terrainRule = null;
+
+    // 1. Regional classification: Check South India
+    if (originRegion === "South" || destRegion === "South") {
+      regionalRule = "South";
+    }
+
+    // 2. High-Altitude Directional Classification
+    if (originTerrain === "HIGH_ALTITUDE" && destTerrain !== "HIGH_ALTITUDE") {
+      // Descending from high altitude toward lower/standard plains (e.g. Badrinath -> Rishikesh / Delhi)
+      terrainRule = "HIMALAYAN_DESCENT";
+    } else if (originTerrain === "HIGH_ALTITUDE" || destTerrain === "HIGH_ALTITUDE") {
+      // Ascending or high-altitude internal route (e.g. Delhi -> Badrinath or Rishikesh -> Badrinath)
+      terrainRule = "HIGH_ALTITUDE_STANDARD";
+    }
+
+    return {
+      originCity: originMeta ? originMeta.name : (origin || "Origin"),
+      destinationCity: destMeta ? destMeta.name : (destination || "Destination"),
+      originRegion,
+      destRegion,
+      originTerrain,
+      destTerrain,
+      regionalRule,
+      terrainRule
+    };
+  }
 
   /**
    * Calculates the base sedan fare for a given distance in kilometers.
+   * Formula: (km * 11) + 400 (minimum ₹800)
    * @param {number} distanceKm 
    * @returns {number}
    */
   function calculateSedanBaseFare(distanceKm) {
     const km = Math.max(1, Number(distanceKm) || 1);
-    const calculated = (km * RATES.sedanPerKm) + RATES.sedanBaseFare;
-    return Math.max(RATES.minimumFare, Math.round(calculated));
+    const calculated = (km * BASE_RATES.sedanPerKm) + BASE_RATES.sedanBaseFare;
+    return Math.max(BASE_RATES.minimumFare, Math.round(calculated));
   }
 
   /**
-   * Calculates One Way fare for a specific vehicle category.
-   * @param {number} distanceKm 
-   * @param {string} carType - 'hatchback' | 'sedan' | 'suv' | 'innova' | 'crysta'
+   * Calculates One Way fare with regional and terrain adjustments.
+   * @param {object} params
    * @returns {object} Fare breakdown
    */
-  function calculateOneWayFare(distanceKm, carType = "sedan") {
+  function calculateOneWayFare(params) {
+    // Support either object or legacy (distanceKm, carType) signature
+    let distanceKm = 100;
+    let carType = "sedan";
+    let origin = "Delhi";
+    let destination = "Chandigarh";
+
+    if (typeof params === "object" && params !== null) {
+      distanceKm = params.distanceKm || params.distance || 100;
+      carType = params.carType || params.vehicleType || "sedan";
+      origin = params.origin || params.fromCity || params.pickupCity || "Delhi";
+      destination = params.destination || params.toCity || params.dropCity || "Chandigarh";
+    } else {
+      distanceKm = arguments[0] || 100;
+      carType = arguments[1] || "sedan";
+    }
+
     const type = carType.toLowerCase();
-    const sedanFare = calculateSedanBaseFare(distanceKm);
-    const adjustment = RATES.adjustments[type] !== undefined ? RATES.adjustments[type] : 0;
-    const finalFare = Math.max(RATES.minimumFare, sedanFare + adjustment);
+    const appliedRules = ["SEDAN_BASE"];
+
+    // 1. Base Sedan Fare
+    const baseSedan = calculateSedanBaseFare(distanceKm);
+
+    // 2. Vehicle Adjustment
+    const vehAdj = BASE_RATES.adjustments[type] !== undefined ? BASE_RATES.adjustments[type] : 0;
+    if (type !== "sedan") {
+      appliedRules.push(type.toUpperCase() + "_ADJUSTMENT");
+    }
+
+    const subtotal = Math.max(BASE_RATES.minimumFare, baseSedan + vehAdj);
+
+    // 3. Route Classification
+    const routeClassification = classifyRoute(origin, destination);
+    let regionalMultiplier = 1.0;
+    let regionalAdjustment = 0;
+
+    if (routeClassification.regionalRule && REGIONAL_PRICING_RULES[routeClassification.regionalRule]) {
+      const regConfig = REGIONAL_PRICING_RULES[routeClassification.regionalRule];
+      regionalMultiplier = regConfig.multiplier;
+      appliedRules.push(regConfig.ruleCode);
+    }
+
+    // 4. Terrain Adjustment
+    let terrainMultiplier = 1.0;
+    let specialRouteAdjustment = 0;
+
+    if (routeClassification.terrainRule && HIGH_ALTITUDE_RULES[routeClassification.terrainRule]) {
+      const terConfig = HIGH_ALTITUDE_RULES[routeClassification.terrainRule];
+      terrainMultiplier = terConfig.multiplier;
+      appliedRules.push(terConfig.ruleCode);
+    }
+
+    // Calculate adjustments sequentially without double-multiplying
+    if (regionalMultiplier > 1.0) {
+      regionalAdjustment = Math.round(subtotal * (regionalMultiplier - 1.0));
+    }
+    if (terrainMultiplier > 1.0) {
+      specialRouteAdjustment = Math.round(subtotal * (terrainMultiplier - 1.0));
+    }
+
+    const finalFare = subtotal + regionalAdjustment + specialRouteAdjustment;
 
     return {
       serviceType: "oneway",
       carType: type,
       distanceKm: Math.round(distanceKm),
-      baseFareSedan: sedanFare,
-      vehicleAdjustment: adjustment,
-      finalFare: finalFare,
-      ratePerKm: RATES.sedanPerKm,
+      baseFareSedan: baseSedan,
+      vehicleAdjustment: vehAdj,
+      regionalAdjustment,
+      specialRouteAdjustment,
+      finalFare,
+      ratePerKm: BASE_RATES.sedanPerKm,
+      appliedRules,
+      routeClassification,
       tollIncluded: false,
-      disclaimer: "Estimated fare. Toll, parking and applicable taxes may be extra."
+      disclaimer: "Estimated fare. Toll taxes, state permits & parking are payable as per actual receipts."
     };
   }
 
   /**
    * Calculates Round Trip fare.
-   * Formula: Total distance (2x one way or minimum 250km/day) at round-trip rate + vehicle adjustment + driver allowance.
-   * @param {number} distanceKm - One way distance
-   * @param {number} days - Number of trip days
-   * @param {string} carType
+   * @param {object} params
    * @returns {object} Fare breakdown
    */
-  function calculateRoundTripFare(distanceKm, days = 1, carType = "sedan") {
+  function calculateRoundTripFare(params) {
+    let distanceKm = 100;
+    let days = 1;
+    let carType = "sedan";
+    let origin = "Delhi";
+    let destination = "Chandigarh";
+
+    if (typeof params === "object" && params !== null) {
+      distanceKm = params.distanceKm || params.distance || 100;
+      days = params.days || 1;
+      carType = params.carType || params.vehicleType || "sedan";
+      origin = params.origin || params.fromCity || params.pickupCity || "Delhi";
+      destination = params.destination || params.toCity || params.dropCity || "Chandigarh";
+    } else {
+      distanceKm = arguments[0] || 100;
+      days = arguments[1] || 1;
+      carType = arguments[2] || "sedan";
+    }
+
     const type = carType.toLowerCase();
     const tripDays = Math.max(1, parseInt(days, 10) || 1);
     const rawTotalKm = (Number(distanceKm) || 1) * 2;
-    const minBillableKm = tripDays * RATES.roundTripMinKmPerDay;
+    const minBillableKm = tripDays * BASE_RATES.roundTripMinKmPerDay;
     const billableKm = Math.max(rawTotalKm, minBillableKm);
 
-    // Sedan Round trip rate: ₹10.5/km + driver allowance
-    const roundTripSedanKmRate = 10.5;
-    const baseDistanceFare = Math.round(billableKm * roundTripSedanKmRate);
-    const driverAllowance = tripDays * RATES.roundTripDriverAllowancePerDay;
+    const appliedRules = ["ROUNDTRIP_BASE"];
+
+    const baseDistanceFare = Math.round(billableKm * BASE_RATES.roundTripSedanKmRate);
+    const driverAllowance = tripDays * BASE_RATES.roundTripDriverAllowancePerDay;
     const sedanTotal = baseDistanceFare + driverAllowance;
 
-    // Vehicle adjustment proportional to trip duration
-    const baseAdj = RATES.adjustments[type] !== undefined ? RATES.adjustments[type] : 0;
-    // For round trips, SUV/Innova adjustment scales reasonably with multi-day trips
+    const baseAdj = BASE_RATES.adjustments[type] !== undefined ? BASE_RATES.adjustments[type] : 0;
     const vehicleAdjustment = type === "sedan" ? 0 : (baseAdj > 0 ? baseAdj + ((tripDays - 1) * 1000) : baseAdj * tripDays);
-    const finalFare = Math.max(RATES.minimumFare * 2, sedanTotal + vehicleAdjustment);
+    if (type !== "sedan") {
+      appliedRules.push(type.toUpperCase() + "_ADJUSTMENT");
+    }
+
+    const subtotal = Math.max(BASE_RATES.minimumFare * 2, sedanTotal + vehicleAdjustment);
+
+    const routeClassification = classifyRoute(origin, destination);
+    let regionalAdjustment = 0;
+    let specialRouteAdjustment = 0;
+
+    if (routeClassification.regionalRule && REGIONAL_PRICING_RULES[routeClassification.regionalRule]) {
+      const regConfig = REGIONAL_PRICING_RULES[routeClassification.regionalRule];
+      regionalAdjustment = Math.round(subtotal * (regConfig.multiplier - 1.0));
+      appliedRules.push(regConfig.ruleCode);
+    }
+
+    if (routeClassification.terrainRule && HIGH_ALTITUDE_RULES[routeClassification.terrainRule]) {
+      const terConfig = HIGH_ALTITUDE_RULES[routeClassification.terrainRule];
+      specialRouteAdjustment = Math.round(subtotal * (terConfig.multiplier - 1.0));
+      appliedRules.push(terConfig.ruleCode);
+    }
+
+    const finalFare = subtotal + regionalAdjustment + specialRouteAdjustment;
 
     return {
       serviceType: "roundtrip",
@@ -101,21 +293,37 @@ const PricingEngine = (() => {
       billableKm: Math.round(billableKm),
       days: tripDays,
       baseFareSedan: sedanTotal,
-      driverAllowance: driverAllowance,
-      vehicleAdjustment: vehicleAdjustment,
-      finalFare: finalFare,
+      driverAllowance,
+      vehicleAdjustment,
+      regionalAdjustment,
+      specialRouteAdjustment,
+      finalFare,
+      appliedRules,
+      routeClassification,
       tollIncluded: false,
-      disclaimer: "Estimated fare for complete round trip. State tax, toll and parking extra."
+      disclaimer: "Estimated fare for complete round trip. State border taxes, highway tolls and parking extra."
     };
   }
 
   /**
    * Calculates Local Sightseeing package fare.
-   * @param {string} packageId - '4hr40km' | '8hr80km' | '12hr120km'
-   * @param {string} carType
+   * @param {object} params
    * @returns {object} Fare breakdown
    */
-  function calculateLocalFare(packageId = "8hr80km", carType = "sedan") {
+  function calculateLocalFare(params) {
+    let packageId = "8hr80km";
+    let carType = "sedan";
+    let origin = "Delhi";
+
+    if (typeof params === "object" && params !== null) {
+      packageId = params.packageId || "8hr80km";
+      carType = params.carType || params.vehicleType || "sedan";
+      origin = params.origin || params.fromCity || params.pickupCity || "Delhi";
+    } else {
+      packageId = arguments[0] || "8hr80km";
+      carType = arguments[1] || "sedan";
+    }
+
     const type = carType.toLowerCase();
     const pkgMap = {
       "4hr40km": { hours: 4, km: 40, sedanPrice: 1400, label: "4 Hrs / 40 KM" },
@@ -132,83 +340,144 @@ const PricingEngine = (() => {
       crysta: 1600
     };
 
+    const appliedRules = ["LOCAL_PACKAGE_" + packageId.toUpperCase()];
     const adjustment = localAdjustments[type] !== undefined ? localAdjustments[type] : 0;
-    const finalFare = pkg.sedanPrice + adjustment;
+    if (type !== "sedan") {
+      appliedRules.push(type.toUpperCase() + "_LOCAL_ADJUSTMENT");
+    }
+
+    const subtotal = pkg.sedanPrice + adjustment;
+    const originMeta = getCityMeta(origin);
+    let regionalAdjustment = 0;
+
+    if (originMeta && originMeta.region === "South") {
+      regionalAdjustment = Math.round(subtotal * 0.05);
+      appliedRules.push("SOUTH_REGION_MULTIPLIER");
+    }
+
+    const finalFare = subtotal + regionalAdjustment;
 
     return {
       serviceType: "local",
-      packageId: packageId,
+      packageId,
       packageLabel: pkg.label,
       hours: pkg.hours,
       distanceKm: pkg.km,
       carType: type,
       baseFareSedan: pkg.sedanPrice,
       vehicleAdjustment: adjustment,
-      finalFare: finalFare,
+      regionalAdjustment,
+      specialRouteAdjustment: 0,
+      finalFare,
+      appliedRules,
       tollIncluded: false,
-      disclaimer: "Tolls, parking and entry fees to tourist locations to be paid directly."
+      disclaimer: "Tolls, parking and monument entry fees payable directly."
     };
   }
 
   /**
    * Calculates Airport Transfer fare.
-   * @param {number} distanceKm
-   * @param {string} transferType - 'airport_to_city' | 'city_to_airport'
-   * @param {string} carType
+   * @param {object} params
    * @returns {object} Fare breakdown
    */
-  function calculateAirportFare(distanceKm = 35, transferType = "airport_to_city", carType = "sedan") {
+  function calculateAirportFare(params) {
+    let distanceKm = 35;
+    let transferType = "airport_to_city";
+    let carType = "sedan";
+    let origin = "Delhi Airport";
+    let destination = "Delhi NCR";
+
+    if (typeof params === "object" && params !== null) {
+      distanceKm = params.distanceKm || params.distance || 35;
+      transferType = params.transferType || "airport_to_city";
+      carType = params.carType || params.vehicleType || "sedan";
+      origin = params.origin || params.airport || "Delhi Airport";
+      destination = params.destination || params.dropCity || "Delhi NCR";
+    } else {
+      distanceKm = arguments[0] || 35;
+      transferType = arguments[1] || "airport_to_city";
+      carType = arguments[2] || "sedan";
+    }
+
     const type = carType.toLowerCase();
     const km = Math.max(10, Number(distanceKm) || 35);
-    // Airport transfer formula: standard one-way with minimum ₹999 for airport reliability
-    const oneWay = calculateOneWayFare(km, type);
+    const oneWay = calculateOneWayFare({
+      origin,
+      destination,
+      distanceKm: km,
+      carType: type
+    });
+
     const finalFare = Math.max(999, oneWay.finalFare);
+    const appliedRules = [...oneWay.appliedRules];
+    if (finalFare === 999 && oneWay.finalFare < 999) {
+      appliedRules.push("AIRPORT_MINIMUM_FARE_FLOOR");
+    }
 
     return {
       serviceType: "airport",
-      transferType: transferType,
+      transferType,
       distanceKm: Math.round(km),
       carType: type,
       baseFareSedan: oneWay.baseFareSedan,
       vehicleAdjustment: oneWay.vehicleAdjustment,
-      finalFare: finalFare,
+      regionalAdjustment: oneWay.regionalAdjustment,
+      specialRouteAdjustment: oneWay.specialRouteAdjustment,
+      finalFare,
+      appliedRules,
       tollIncluded: false,
-      disclaimer: "Airport parking & toll taxes (if applicable) are extra."
+      disclaimer: "Airport terminal parking & toll charges extra as per receipt."
     };
   }
 
   /**
-   * Master dispatcher for all vehicle options given search parameters.
-   * Returns an array of pricing quotes for all 5 car categories.
-   * @param {object} searchParams
+   * Central Master Fare Calculator for any request.
+   * @param {object} params
+   * @returns {object}
+   */
+  function calculateFare(params) {
+    const serviceType = (params.serviceType || "oneway").toLowerCase();
+    switch (serviceType) {
+      case "roundtrip":
+        return calculateRoundTripFare(params);
+      case "local":
+        return calculateLocalFare(params);
+      case "airport":
+        return calculateAirportFare(params);
+      case "oneway":
+      default:
+        return calculateOneWayFare(params);
+    }
+  }
+
+  /**
+   * Generates quotes for all 5 vehicle types for a given search.
+   * @param {object} searchParams 
    * @returns {Array<object>}
    */
   function getAllVehicleFares(searchParams) {
-    const serviceType = (searchParams.serviceType || "oneway").toLowerCase();
     const vehicleTypes = ["hatchback", "sedan", "suv", "innova", "crysta"];
-
     return vehicleTypes.map((type) => {
-      let quote;
-      if (serviceType === "roundtrip") {
-        quote = calculateRoundTripFare(searchParams.distanceKm || 200, searchParams.days || 1, type);
-      } else if (serviceType === "local") {
-        quote = calculateLocalFare(searchParams.packageId || "8hr80km", type);
-      } else if (serviceType === "airport") {
-        quote = calculateAirportFare(searchParams.distanceKm || 35, searchParams.transferType, type);
-      } else {
-        quote = calculateOneWayFare(searchParams.distanceKm || 200, type);
-      }
-      return quote;
+      return calculateFare({
+        ...searchParams,
+        carType: type,
+        vehicleType: type
+      });
     });
   }
 
   return {
-    RATES,
+    PRICING_VERSION,
+    RATES: BASE_RATES,
+    REGIONAL_PRICING_RULES,
+    HIGH_ALTITUDE_RULES,
+    classifyRoute,
     calculateSedanBaseFare,
     calculateOneWayFare,
     calculateRoundTripFare,
     calculateLocalFare,
     calculateAirportFare,
+    calculateFare,
     getAllVehicleFares
   };
 })();

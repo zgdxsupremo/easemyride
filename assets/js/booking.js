@@ -1,9 +1,17 @@
-/**
- * MargDrive — Booking Checkout Controller (booking.js)
+﻿/**
+ * Marg Drive — Booking Checkout Controller (booking.js)
  * 
  * Manages passenger details collection, journey address specifications,
- * trip summary verification, robust validation, and Apps Script submission.
+ * trip summary verification, robust validation, and ₹500 UPI checkout.
  */
+
+const PAYMENT_CONFIG = {
+  provider: "MANUAL_UPI",
+  amount: 500,
+  currency: "INR",
+  upiId: "muskankushwaha787-2@oksbi",
+  merchantName: "Marg Drive"
+};
 
 document.addEventListener("DOMContentLoaded", () => {
   UI.injectNavigation("booking");
@@ -21,12 +29,12 @@ document.addEventListener("DOMContentLoaded", () => {
   if (!bookingData && urlParams.has("from")) {
     const dist = parseInt(urlParams.get("dist"), 10) || 250;
     const car = urlParams.get("car") || "sedan";
-    const quote = PricingEngine.calculateOneWayFare(dist, car);
+    const quote = PricingEngine.calculateOneWayFare({ distanceKm: dist, carType: car, origin: urlParams.get("from") || "Delhi", destination: urlParams.get("to") || "Chandigarh" });
 
     bookingData = {
       serviceType: urlParams.get("service") || "oneway",
-      fromCity: urlParams.get("from") || "Delhi",
-      toCity: urlParams.get("to") || "Chandigarh",
+      pickupCity: urlParams.get("from") || "Delhi",
+      dropCity: urlParams.get("to") || "Chandigarh",
       pickupDate: urlParams.get("date") || FormValidator.formatDateForInput(new Date()),
       pickupTime: urlParams.get("time") || "08:00",
       returnDate: urlParams.get("returnDate") || "",
@@ -37,12 +45,14 @@ document.addEventListener("DOMContentLoaded", () => {
       carName: (MargDriveConfig.vehicles.find((v) => v.id === car) || { name: "Sedan" }).name,
       finalFare: parseInt(urlParams.get("fare"), 10) || quote.finalFare,
       baseFare: quote.baseFareSedan,
-      vehicleAdjustment: quote.vehicleAdjustment
+      vehicleAdjustment: quote.vehicleAdjustment,
+      regionalAdjustment: quote.regionalAdjustment || 0,
+      specialRouteAdjustment: quote.specialRouteAdjustment || 0,
+      appliedRules: quote.appliedRules || []
     };
   }
 
   if (!bookingData) {
-    // If no booking intent, redirect back to homepage
     window.location.href = "index.html";
     return;
   }
@@ -119,87 +129,74 @@ function initBookingForm(bookingData) {
       }
 
       // 2. Email Validation
-      if (!email) {
-        FormValidator.showFieldError(emailInput, "Please enter your email address.");
-        hasError = true;
-      } else if (!FormValidator.isValidEmail(email)) {
-        FormValidator.showFieldError(emailInput, "Enter a valid email address.");
+      if (!email || !FormValidator.isValidEmail(email)) {
+        FormValidator.showFieldError(emailInput, "Please enter a valid email address.");
         hasError = true;
       }
 
       // 3. Phone Validation
-      if (!phone) {
-        FormValidator.showFieldError(phoneInput, "Please enter your 10-digit mobile number.");
-        hasError = true;
-      } else if (!FormValidator.isValidIndianPhone(phone)) {
+      if (!phone || !FormValidator.isValidIndianPhone(phone)) {
         FormValidator.showFieldError(phoneInput, "Enter a valid 10-digit Indian mobile number.");
         hasError = true;
       }
 
       // 4. Pickup Address Validation
       if (!pickupAddress || pickupAddress.length < 5) {
-        FormValidator.showFieldError(pickupAddressInput, "Please enter complete pickup address / landmark.");
+        FormValidator.showFieldError(pickupAddressInput, "Please provide complete pickup address / landmark (min 5 chars).");
         hasError = true;
       }
 
-      // 5. Dropoff Address Validation (if intercity/airport)
-      if (bookingData.serviceType !== "local" && (!dropAddress || dropAddress.length < 3)) {
-        FormValidator.showFieldError(dropAddressInput, "Please enter destination drop address / landmark.");
-        hasError = true;
-      }
-
-      // 6. Date validation
+      // 5. Pickup Date Validation
       if (!startDate || !FormValidator.isFutureOrTodayDate(startDate)) {
-        FormValidator.showFieldError(startDateInput, "Please select a valid future pickup date.");
+        FormValidator.showFieldError(startDateInput, "Pickup date cannot be in the past.");
         hasError = true;
       }
 
+      // 6. Round Trip Return Date Validation
       if (bookingData.serviceType === "roundtrip") {
-        if (!returnDate || !FormValidator.isValidReturnDate(startDate, returnDate)) {
+        if (!returnDate) {
+          FormValidator.showFieldError(returnDateInput, "Please specify return date for round trip.");
+          hasError = true;
+        } else if (!FormValidator.isValidReturnDate(startDate, returnDate)) {
           FormValidator.showFieldError(returnDateInput, "Return date must be on or after pickup date.");
           hasError = true;
         }
       }
 
       if (hasError) {
-        UI.showToast("Incomplete Form", "Please correct the highlighted fields before proceeding.", "error");
+        UI.showToast("Incomplete Details", "Please correct the highlighted fields before proceeding.", "error");
         return;
       }
 
-      // Build Complete Submission Payload
+      UI.showLoading("Creating booking request & generating payment link...");
+
       const finalBookingPayload = {
-        fullName: fullName,
-        email: email,
-        countryCode: "+91",
-        phoneNumber: FormValidator.sanitizePhoneNumber(phone),
-        fromCity: bookingData.fromCity,
-        toCity: bookingData.toCity,
+        customerName: fullName,
+        customerEmail: email,
+        customerPhone: FormValidator.sanitizePhoneNumber(phone),
+        serviceType: bookingData.serviceType,
+        fromCity: bookingData.pickupCity || bookingData.fromCity,
+        toCity: bookingData.dropCity || bookingData.toCity,
         pickupAddress: pickupAddress,
-        dropoffAddress: dropAddress || `${bookingData.fromCity} City Tour`,
-        startingDate: startDate,
-        startingTime: startTime,
-        returningDate: returnDate,
-        returningTime: returnTime,
-        journeyType: {
-          oneway: "One Way",
-          roundtrip: "Round Trip",
-          local: "Local Sightseeing",
-          airport: "Airport Transfer"
-        }[bookingData.serviceType] || "One Way",
-        carType: bookingData.carType,
-        carName: bookingData.carName,
+        dropoffAddress: dropAddress || `${bookingData.dropCity || bookingData.toCity} City Center`,
+        pickupDate: startDate,
+        pickupTime: startTime || "08:00",
+        returnDate: returnDate || null,
+        returnTime: returnTime || null,
+        vehicleType: bookingData.carType,
+        vehicleName: bookingData.carName,
         distanceKm: bookingData.distanceKm,
         baseFare: bookingData.baseFare,
-        vehicleAdjustment: bookingData.vehicleAdjustment,
         finalFare: bookingData.finalFare,
-        remarks: remarks
+        regionalAdjustment: bookingData.regionalAdjustment || 0,
+        specialRouteAdjustment: bookingData.specialRouteAdjustment || 0,
+        appliedRules: bookingData.appliedRules || [],
+        pricingVersion: PricingEngine.PRICING_VERSION,
+        customerRemarks: remarks || null
       };
-
-      UI.showLoading("Creating your booking request securely...");
 
       try {
         const result = await ApiService.submitBooking(finalBookingPayload);
-
         UI.hideLoading();
 
         if (result && result.success) {
@@ -207,7 +204,6 @@ function initBookingForm(bookingData) {
           const paymentRequestId = result.paymentRequestId;
           const paymentMeta = result.paymentMetadata || {};
 
-          // Store current booking context
           sessionStorage.setItem("rod_active_booking_id", bookingId);
           sessionStorage.setItem("rod_active_request_id", paymentRequestId);
 
@@ -219,13 +215,18 @@ function initBookingForm(bookingData) {
 
           // Populate Payment details
           document.getElementById("payment-req-id-display").textContent = paymentRequestId;
-          const upiId = paymentMeta.upiId || "muskankushwaha787-2@oksbi";
+          const upiId = paymentMeta.upiId || PAYMENT_CONFIG.upiId;
           document.getElementById("upi-id-text").textContent = upiId;
-          document.getElementById("upi-id-bold").textContent = upiId;
-          
+
           const deepLinkEl = document.getElementById("btn-upi-deeplink");
-          if (deepLinkEl && paymentMeta.upiDeepLink) {
-            deepLinkEl.href = paymentMeta.upiDeepLink;
+          const deepLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(PAYMENT_CONFIG.merchantName)}&am=${PAYMENT_CONFIG.amount}&cu=INR`;
+          if (deepLinkEl) {
+            deepLinkEl.href = deepLink;
+          }
+
+          const qrImg = document.getElementById("upi-qr-image");
+          if (qrImg) {
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(deepLink)}`;
           }
 
           // Initialize Payment Proof Submit Handler
@@ -253,7 +254,7 @@ function initBookingForm(bookingData) {
   const copyUpiBtn = document.getElementById("btn-copy-upi");
   if (copyUpiBtn) {
     copyUpiBtn.addEventListener("click", () => {
-      const upiText = document.getElementById("upi-id-text")?.textContent || "muskankushwaha787-2@oksbi";
+      const upiText = document.getElementById("upi-id-text")?.textContent || PAYMENT_CONFIG.upiId;
       navigator.clipboard.writeText(upiText).then(() => {
         UI.showToast("Copied!", `UPI ID ${upiText} copied to clipboard.`, "success");
       }).catch(() => {
@@ -264,39 +265,27 @@ function initBookingForm(bookingData) {
 }
 
 /**
- * Initializes the UTR / Payment Proof submission handler and live status tracker
+ * Initializes the Payment Confirmation submission handler and live status tracker
  */
 function initPaymentProofHandler(bookingId, paymentRequestId) {
   const proofForm = document.getElementById("payment-proof-form");
-  const utrInput = document.getElementById("payment-utr");
   const screenshotInput = document.getElementById("payment-screenshot");
-  const utrError = document.getElementById("utr-error");
 
   if (!proofForm) return;
 
   proofForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const utr = utrInput ? utrInput.value.trim() : "";
-    if (!utr || utr.length < 6) {
-      if (utrError) utrError.textContent = "Please enter a valid 12-digit UTR / transaction reference number (min 6 characters).";
-      if (utrInput) utrInput.classList.add("is-invalid");
-      return;
-    }
-
-    if (utrInput) utrInput.classList.remove("is-invalid");
-    if (utrError) utrError.textContent = "";
-
     const formData = new FormData();
-    formData.append("utrNumber", utr);
-    formData.append("paymentAmount", 500);
+    formData.append("utrNumber", "UPI-VERIFICATION-PENDING");
+    formData.append("paymentAmount", PAYMENT_CONFIG.amount);
     formData.append("paymentTimestamp", new Date().toISOString());
 
     if (screenshotInput && screenshotInput.files && screenshotInput.files[0]) {
       formData.append("screenshot", screenshotInput.files[0]);
     }
 
-    UI.showLoading("Submitting payment proof for verification...");
+    UI.showLoading("Submitting payment confirmation for verification...");
 
     try {
       const proofResult = await ApiService.submitPaymentProof(bookingId, formData);
@@ -310,19 +299,18 @@ function initPaymentProofHandler(bookingId, paymentRequestId) {
         window.scrollTo({ top: 0, behavior: "smooth" });
 
         document.getElementById("tracker-req-id").textContent = paymentRequestId;
-        document.getElementById("tracker-utr").textContent = utr;
 
-        UI.showToast("Proof Received", "Your ₹500 payment confirmation is under review. Polling verification status...", "success");
+        UI.showToast("Confirmation Received", "Your ₹500 payment confirmation is under review. Polling verification status...", "success");
 
         // Start polling for verification every 4 seconds
         startStatusPolling(bookingId, paymentRequestId);
       } else {
-        UI.showToast("Notice", (proofResult && proofResult.message) || "Unable to submit proof. Please try again.", "error");
+        UI.showToast("Notice", (proofResult && proofResult.message) || "Unable to submit confirmation. Please try again.", "error");
       }
     } catch (err) {
       UI.hideLoading();
-      console.error("Proof submission error:", err);
-      UI.showToast("Notice", "Unable to submit proof. Please try again or contact helpline 7973785807.", "error");
+      console.error("Confirmation error:", err);
+      UI.showToast("Notice", "Unable to submit confirmation. Please try again or contact helpline 7973785807.", "error");
     }
   });
 
@@ -377,7 +365,7 @@ function startStatusPolling(bookingId, paymentRequestId) {
         }
       }
     } catch (e) {
-      // Quiet background retry
+      // Background retry
     }
   }, 4000);
 }
@@ -393,23 +381,48 @@ function renderTripSidebar(bookingData) {
   const vehList = config.vehicles || [];
   const vehMeta = vehList.find((v) => v.id === bookingData.carType) || vehList[1] || { name: "Sedan", category: "Comfortable Intercity" };
 
+  const regAdj = bookingData.regionalAdjustment || 0;
+  const routeAdj = bookingData.specialRouteAdjustment || 0;
+
   container.innerHTML = `
     <div class="trip-summary-sidebar">
       <h3 style="font-size:1.2rem; margin-bottom:1rem; color:var(--secondary);">Trip Summary</h3>
       
       <div class="summary-route-box">
         <div class="summary-cities">
-          ${bookingData.serviceType === "local" ? `📍 ${UI.escapeHTML(bookingData.fromCity)} (Local Package)` : `${UI.escapeHTML(bookingData.fromCity)} ➔ ${UI.escapeHTML(bookingData.toCity)}`}
+          ${bookingData.serviceType === "local" ? `📍 ${UI.escapeHTML(bookingData.pickupCity || bookingData.fromCity)} (Local Package)` : `${UI.escapeHTML(bookingData.pickupCity || bookingData.fromCity)} ➔ ${UI.escapeHTML(bookingData.dropCity || bookingData.toCity)}`}
         </div>
         <div class="summary-meta">
           <span>📅 ${UI.formatDateDisplay(bookingData.pickupDate)} at ${UI.formatTimeDisplay(bookingData.pickupTime)}</span>
           <span>🚗 ${vehMeta.name} (${vehMeta.category})</span>
-          <span>🛣️ ${bookingData.distanceKm} KM Estimated Route</span>
+          <span>🛣️ ${bookingData.distanceKm} KM Road Distance</span>
         </div>
       </div>
 
       <div class="fare-breakdown-list">
         <div class="fare-breakdown-row">
+          <span>Base Sedan Rate</span>
+          <span>₹${Number(bookingData.baseFare || 3000).toLocaleString("en-IN")}</span>
+        </div>
+        ${bookingData.vehicleAdjustment ? `
+          <div class="fare-breakdown-row">
+            <span>Vehicle Adjustment (${bookingData.carType.toUpperCase()})</span>
+            <span>${bookingData.vehicleAdjustment >= 0 ? `+ ₹${Number(bookingData.vehicleAdjustment).toLocaleString("en-IN")}` : `- ₹${Math.abs(bookingData.vehicleAdjustment)}`}</span>
+          </div>
+        ` : ""}
+        ${regAdj > 0 ? `
+          <div class="fare-breakdown-row">
+            <span>Regional Adjustment (South India)</span>
+            <span>+ ₹${Number(regAdj).toLocaleString("en-IN")}</span>
+          </div>
+        ` : ""}
+        ${routeAdj > 0 ? `
+          <div class="fare-breakdown-row">
+            <span>Special Terrain Adjustment</span>
+            <span>+ ₹${Number(routeAdj).toLocaleString("en-IN")}</span>
+          </div>
+        ` : ""}
+        <div class="fare-breakdown-row" style="font-weight:700; border-top:1px solid #E2E8F0; padding-top:0.4rem;">
           <span>Estimated Total Fare</span>
           <span>₹${Number(bookingData.finalFare).toLocaleString("en-IN")}</span>
         </div>
