@@ -94,7 +94,7 @@ if (hatchQuote.finalFare !== 3600) throw new Error("Hatchback pricing mismatch")
 const FormValidator = require(path.join(projectDir, 'assets/js/validation.js'));
 console.log("\n--- Testing Validation Module ---");
 
-const validPhones = ["7973785807", "+917973785807", "917973785807", "8123456789", "7000123456", "6999988888"];
+const validPhones = ["9041710472", "+919041710472", "919041710472", "8123456789", "7000123456", "6999988888"];
 validPhones.forEach(p => {
   if (!FormValidator.isValidIndianPhone(p)) throw new Error(`Should be valid phone: ${p}`);
 });

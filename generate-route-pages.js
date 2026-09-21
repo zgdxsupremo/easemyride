@@ -45,7 +45,7 @@ function generatePageHtml(route) {
     "provider": {
       "@type": "LocalBusiness",
       "name": "Marg Drive",
-      "telephone": "+91-7973785807"
+      "telephone": "+91-9041710472"
     },
     "areaServed": "India",
     "description": route.metaDescription
@@ -248,7 +248,7 @@ function generatePageHtml(route) {
           <div class="feature-icon">📞</div>
           <div class="feature-content">
             <h4>24/7 Helpline Support</h4>
-            <p>Real dispatch coordinators available 24 hours a day at <strong>7973785807</strong> for immediate assistance.</p>
+            <p>Real dispatch coordinators available 24 hours a day at <strong>9041710472</strong> for immediate assistance.</p>
           </div>
         </div>
       </div>

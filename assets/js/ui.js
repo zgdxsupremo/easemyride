@@ -255,8 +255,8 @@ const UI = (() => {
    * @param {string} activePage
    */
   function injectNavigation(activePage = "home") {
-    const config = window.MargDriveConfig || window.MargDriveConfig || { helplineNumber: "7973785807" };
-    const helpline = config.helplineNumber || "7973785807";
+    const config = window.MargDriveConfig || window.MargDriveConfig || { helplineNumber: "9041710472" };
+    const helpline = config.helplineNumber || "9041710472";
 
     const headerEl = document.getElementById("site-header");
     if (headerEl) {

@@ -11,16 +11,16 @@ const MargDriveConfig = {
   companyName: "Marg Drive",
   brandName: "Marg Drive",
   tagline: "India's Premier On-Demand Intercity & Airport Cab Service",
-  helplineNumber: "7973785807",
-  whatsappNumber: "+917973785807",
+  helplineNumber: "9041710472",
+  whatsappNumber: "+919041710472",
   supportEmail: "support@margdrive.in",
   currentYear: 2026,
 
   // Customer Booking Payment Configuration (₹500 Fee)
-  bookingPaymentUpi: "7973785807@kotakbank",
+  bookingPaymentUpi: "9041710472@kotakbank",
   bookingConfirmationFee: 500,
   paymentProvider: "MANUAL_UPI",
-  upiDeepLink: "upi://pay?pa=7973785807@kotakbank&pn=Marg%20Drive&am=500&cu=INR",
+  upiDeepLink: "upi://pay?pa=9041710472@kotakbank&pn=Marg%20Drive&am=500&cu=INR",
 
   // API Backend Base URL
   apiBaseUrl: window.location.port === "4000" ? "/api" : "http://localhost:4000/api",

@@ -9,7 +9,7 @@ const PAYMENT_CONFIG = {
   provider: "MANUAL_UPI",
   amount: 500,
   currency: "INR",
-  upiId: "7973785807@kotakbank",
+  upiId: "9041710472@kotakbank",
   merchantName: "Marg Drive"
 };
 
@@ -225,7 +225,7 @@ function initBookingForm(bookingData) {
         } else {
           UI.showToast(
             "Booking Notice",
-            (result && result.message) || "We couldn't initialize your booking request. Please try again or contact support at 7973785807.",
+            (result && result.message) || "We couldn't initialize your booking request. Please try again or contact support at 9041710472.",
             "error"
           );
         }
@@ -234,7 +234,7 @@ function initBookingForm(bookingData) {
         console.error("Booking error:", err);
         UI.showToast(
           "Booking Notice",
-          "We couldn't initialize your booking request. Please try again or contact support at 7973785807.",
+          "We couldn't initialize your booking request. Please try again or contact support at 9041710472.",
           "error"
         );
       }
@@ -301,7 +301,7 @@ function initPaymentProofHandler(bookingId, paymentRequestId) {
     } catch (err) {
       UI.hideLoading();
       console.error("Confirmation error:", err);
-      UI.showToast("Notice", "Unable to submit confirmation. Please try again or contact helpline 7973785807.", "error");
+      UI.showToast("Notice", "Unable to submit confirmation. Please try again or contact helpline 9041710472.", "error");
     }
   });
 
@@ -434,7 +434,7 @@ function renderTripSidebar(bookingData) {
 
       <div style="font-size:0.85rem; color:var(--gray-500); display:flex; align-items:center; gap:0.4rem;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        <span>Helpline: <strong>7973785807</strong> (24/7 Support)</span>
+        <span>Helpline: <strong>9041710472</strong> (24/7 Support)</span>
       </div>
     </div>
   `;

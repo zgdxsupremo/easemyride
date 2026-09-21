@@ -70,7 +70,7 @@ function renderSuccessCard(booking) {
 
   const displayCode = booking.bookingCode || booking.booking_code || booking.bookingId || "MD-CONFIRMED";
   const customerName = booking.customerName || booking.customer_name || booking.fullName || "Customer";
-  const phone = booking.customerPhone || booking.customer_phone || booking.phoneNumber || "7973785807";
+  const phone = booking.customerPhone || booking.customer_phone || booking.phoneNumber || "9041710472";
   const from = booking.fromCity || booking.from_city || "Origin";
   const to = booking.toCity || booking.to_city || "Destination";
   const route = from && to ? `${from} ➔ ${to}` : from;
@@ -178,7 +178,7 @@ function renderSuccessCard(booking) {
   const waBtn = document.getElementById("btn-whatsapp-support");
   if (waBtn) {
     const waText = encodeURIComponent(`Hi MargDrive Team, I have booked a cab (ID: ${displayCode}). Please assist with my ride.`);
-    waBtn.href = `https://wa.me/917973785807?text=${waText}`;
+    waBtn.href = `https://wa.me/919041710472?text=${waText}`;
   }
 
   // Print Receipt Button

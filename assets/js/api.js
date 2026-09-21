@@ -47,8 +47,8 @@ const ApiService = (() => {
    * Generates customer SMS text representation using CONFIG helpline.
    */
   function generateSmsText(booking) {
-    const config = (typeof window !== "undefined" && (window.MargDriveConfig || window.MargDriveConfig)) || { helplineNumber: "7973785807" };
-    const helpline = config.helplineNumber || "7973785807";
+    const config = (typeof window !== "undefined" && (window.MargDriveConfig || window.MargDriveConfig)) || { helplineNumber: "9041710472" };
+    const helpline = config.helplineNumber || "9041710472";
     const route = booking.fromCity && booking.toCity ? `${booking.fromCity} → ${booking.toCity}` : (booking.from_city && booking.to_city ? `${booking.from_city} → ${booking.to_city}` : "Intercity Route");
     const carName = (booking.carType || booking.vehicle_type || "Sedan").toUpperCase();
     const fare = booking.finalFare || booking.final_fare ? `₹${Number(booking.finalFare || booking.final_fare).toLocaleString("en-IN")}` : "TBD";
@@ -174,9 +174,9 @@ const ApiService = (() => {
         bookingStatus: "PAYMENT_PENDING",
         ...payload,
         paymentMetadata: {
-          upiId: "7973785807@kotakbank",
+          upiId: "9041710472@kotakbank",
           amountInr: 500,
-          upiDeepLink: "upi://pay?pa=7973785807@kotakbank&pn=MargDrive&am=500&cu=INR"
+          upiDeepLink: "upi://pay?pa=9041710472@kotakbank&pn=MargDrive&am=500&cu=INR"
         }
       };
 
@@ -189,7 +189,7 @@ const ApiService = (() => {
         bookingId: fallbackBooking.id,
         paymentRequestId: reqId,
         brandName: "MargDrive",
-        helpline: "7973785807",
+        helpline: "9041710472",
         bookingFeeInr: 500,
         paymentMetadata: fallbackBooking.paymentMetadata
       };
