@@ -20,7 +20,7 @@ const MargDriveConfig = {
   bookingPaymentUpi: "9041710472@kotakbank",
   bookingConfirmationFee: 500,
   paymentProvider: "MANUAL_UPI",
-  upiDeepLink: "upi://pay?pa=9041710472@kotakbank&pn=Marg%20Drive&am=500&cu=INR",
+  upiDeepLink: "upi://pay?pa=7973785807@kotakbank&pn=Marg%20Drive&am=500&cu=INR",
 
   // API Backend Base URL
   apiBaseUrl: window.location.port === "4000" ? "/api" : "http://localhost:4000/api",
