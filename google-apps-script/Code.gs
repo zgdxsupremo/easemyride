@@ -166,7 +166,7 @@ function handleCreateBooking(data) {
   }
 
   // 3. Generate Customer SMS Text
-  var helpline = config.helplineNumber || "+91 79737 85807";
+  var helpline = config.helplineNumber || "+91 90417 10472";
   var route = (data.fromCity && data.toCity) ? (data.fromCity + " → " + data.toCity) : (data.fromCity || "Local");
   var generatedSms = "MargDrive: Your cab booking request has been received successfully.\n" +
     "Booking ID: " + bookingId + "\n" +
@@ -383,7 +383,7 @@ function handleGetAdminData() {
 function readBusinessConfig(ss) {
   var sheet = getOrCreateSheet(ss, SHEET_CONFIG, ["Key", "Value", "Description"]);
   var config = {
-    helplineNumber: "+91 79737 85807",
+    helplineNumber: "+91 90417 10472",
     sedanRate: 11,
     baseFare: 400,
     suvAdjustment: 3000,
@@ -398,7 +398,7 @@ function readBusinessConfig(ss) {
   if (values.length <= 1) {
     // Seed default CONFIG values
     var seed = [
-      ["Helpline Number", "+91 79737 85807", "Customer support phone number"],
+      ["Helpline Number", "+91 90417 10472", "Customer support phone number"],
       ["Sedan Rate", "11", "Rate per KM for Sedan category"],
       ["Base Fare", "400", "Base flagdown fare added to distance rate"],
       ["SUV Adjustment", "3000", "Price added over Sedan for 6-seater SUV"],

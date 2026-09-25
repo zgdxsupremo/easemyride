@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Marg Drive — Vehicle Search Results Controller (search.js)
  * 
  * Single authoritative search state management, URL-synchronized routing,
@@ -140,7 +140,7 @@ async function initializeSearchFromUrl(pushToHistory = false) {
   renderVehicleResults(searchState);
 
   // Setup Modify Search Modal
-  setupModifySearchModal(searchState);
+  setupModifySearchModal();
 }
 
 /**
@@ -442,10 +442,12 @@ function renderVehicleResults(state) {
   });
 }
 
+let isModifyModalInitialized = false;
+
 /**
  * Sets up the Modify Search modal functionality.
  */
-function setupModifySearchModal(currentState) {
+function setupModifySearchModal() {
   const modifyBtn = document.getElementById("btn-modify-search");
   const modalClose = document.getElementById("btn-close-modify-modal");
   const modifyForm = document.getElementById("modify-search-form");
@@ -455,21 +457,24 @@ function setupModifySearchModal(currentState) {
   const modDate = document.getElementById("mod-pickup-date");
   const modTime = document.getElementById("mod-pickup-time");
 
-  // Attach city autocomplete to modal inputs
+  // Attach city autocomplete to modal inputs if not already done
   if (typeof CitySearch !== "undefined" && typeof CitySearch.attachAutocomplete === "function") {
     if (modFrom) CitySearch.attachAutocomplete(modFrom);
     if (modTo) CitySearch.attachAutocomplete(modTo);
   }
 
+  if (isModifyModalInitialized) return;
+  isModifyModalInitialized = true;
+
   if (modifyBtn) {
     modifyBtn.addEventListener("click", () => {
-      if (modFrom) modFrom.value = currentState.pickupCity;
-      if (modTo) modTo.value = currentState.dropCity;
+      if (modFrom) modFrom.value = searchState.pickupCity;
+      if (modTo) modTo.value = searchState.dropCity;
       if (modDate) {
-        modDate.value = currentState.pickupDate;
+        modDate.value = searchState.pickupDate;
         modDate.min = FormValidator.formatDateForInput(new Date());
       }
-      if (modTime) modTime.value = currentState.pickupTime;
+      if (modTime) modTime.value = searchState.pickupTime;
 
       UI.openModal("modal-modify-search");
     });
@@ -492,7 +497,7 @@ function setupModifySearchModal(currentState) {
       const newDate = modDate.value;
       const newTime = modTime.value;
 
-      if (!newFrom || (currentState.serviceType !== "local" && !newTo)) {
+      if (!newFrom || (searchState.serviceType !== "local" && !newTo)) {
         UI.showToast("Missing Cities", "Please enter valid pickup and drop destinations.", "error");
         return;
       }
@@ -501,21 +506,21 @@ function setupModifySearchModal(currentState) {
       UI.showLoading("Recalculating route and fares...");
 
       try {
-        const distData = await DistanceService.calculateRoadDistance(newFrom, newTo, currentState.serviceType);
+        const distData = await DistanceService.calculateRoadDistance(newFrom, newTo, searchState.serviceType);
 
-        // Completely destroy and replace searchState
+        // Completely replace searchState with fresh values
         searchState = {
-          serviceType: currentState.serviceType,
+          serviceType: searchState.serviceType,
           pickupCity: newFrom,
           dropCity: newTo,
           pickupDate: newDate,
           pickupTime: newTime,
-          returnDate: currentState.returnDate || "",
-          returnTime: currentState.returnTime || "",
-          airport: currentState.airport || "",
-          days: currentState.days || 1,
-          packageId: currentState.packageId || "8hr80km",
-          transferType: currentState.transferType || "airport_to_city",
+          returnDate: searchState.returnDate || "",
+          returnTime: searchState.returnTime || "",
+          airport: searchState.airport || "",
+          days: searchState.days || 1,
+          packageId: searchState.packageId || "8hr80km",
+          transferType: searchState.transferType || "airport_to_city",
           distanceKm: distData.distanceKm,
           duration: distData.duration,
           pricing: null
@@ -527,7 +532,7 @@ function setupModifySearchModal(currentState) {
         // Overwrite localStorage
         localStorage.setItem(MargDriveConfig.storageKeys.lastSearch, JSON.stringify(searchState));
 
-        // Re-render UI
+        // Re-render UI with recalculated fares
         renderRouteSummary(searchState);
         renderVehicleResults(searchState);
 

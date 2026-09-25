@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Marg Drive — All-India City Search & Autocomplete Engine (city-search.js)
  */
 const CitySearch = (() => {
@@ -19,18 +19,22 @@ const CitySearch = (() => {
 
   async function init() {
     if (isLoaded && citiesCache.length > 0) return citiesCache;
-    try {
-      if (typeof fetch !== "undefined") {
-        const res = await fetch("assets/data/india-cities.json");
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            citiesCache = data;
-            isLoaded = true;
+    const paths = ["assets/data/india-cities.json", "/assets/data/india-cities.json", "../assets/data/india-cities.json"];
+    for (const p of paths) {
+      try {
+        if (typeof fetch !== "undefined") {
+          const res = await fetch(p);
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && data.length > 0) {
+              citiesCache = data;
+              isLoaded = true;
+              return citiesCache;
+            }
           }
         }
-      }
-    } catch (e) {}
+      } catch (e) {}
+    }
     return citiesCache;
   }
 
@@ -50,8 +54,8 @@ const CitySearch = (() => {
     const seenNames = new Set();
 
     for (const city of citiesCache) {
-      const cityNameLower = city.name.toLowerCase();
-      const stateLower = city.state.toLowerCase();
+      const cityNameLower = (city.name || "").toLowerCase();
+      const stateLower = (city.state || "").toLowerCase();
       const aliasesLower = (city.aliases || []).map(a => a.toLowerCase());
 
       if (cityNameLower === q) {
@@ -84,13 +88,13 @@ const CitySearch = (() => {
     if (!cityName) return null;
     const nameLower = cityName.trim().toLowerCase();
     for (const city of citiesCache) {
-      if (city.name.toLowerCase() === nameLower) return city;
+      if ((city.name || "").toLowerCase() === nameLower) return city;
     }
     for (const city of citiesCache) {
       if ((city.aliases || []).some(a => a.toLowerCase() === nameLower)) return city;
     }
     for (const city of citiesCache) {
-      if (city.name.toLowerCase().includes(nameLower) || nameLower.includes(city.name.toLowerCase())) return city;
+      if ((city.name || "").toLowerCase().includes(nameLower) || nameLower.includes((city.name || "").toLowerCase())) return city;
     }
     return null;
   }
@@ -102,7 +106,7 @@ const CitySearch = (() => {
     if (!dropdown) {
       dropdown = document.createElement("div");
       dropdown.className = "city-autocomplete-dropdown";
-      dropdown.style.cssText = "position:absolute; top:100%; left:0; right:0; background:#fff; border:1px solid #E2E8F0; border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.1); max-height:260px; overflow-y:auto; z-index:1000; display:none; margin-top:4px;";
+      dropdown.style.cssText = "position:absolute; top:calc(100% + 4px); left:0; right:0; background:#ffffff; border:1.5px solid #CBD5E1; border-radius:10px; box-shadow:0 12px 30px rgba(0,0,0,0.15); max-height:280px; overflow-y:auto; z-index:99999; display:none;";
       inputEl.parentElement.style.position = "relative";
       inputEl.parentElement.appendChild(dropdown);
     }
@@ -118,10 +122,10 @@ const CitySearch = (() => {
       }
 
       dropdown.innerHTML = results.map((city, idx) => {
-        const terrainBadge = city.terrainCategory === "HIGH_ALTITUDE" ? '<span style="font-size:0.7rem; background:#FEF3C7; color:#B45309; padding:2px 6px; border-radius:10px; font-weight:700;">⛰️ Hill / Dham</span>' : (city.terrainCategory === "AIRPORT_HUB" ? '<span style="font-size:0.7rem; background:#E0F2FE; color:#0369A1; padding:2px 6px; border-radius:10px; font-weight:700;">✈️ Airport</span>' : "");
-        return '<div class="city-suggest-item" data-index="' + idx + '" style="padding:10px 14px; cursor:pointer; border-bottom:1px solid #F1F5F9; display:flex; justify-content:space-between; align-items:center; transition:background 0.15s;">' +
-          '<div><div style="font-weight:600; color:#0F172A; font-size:0.95rem;">' + city.name + '</div>' +
-          '<div style="font-size:0.78rem; color:#64748B;">' + city.state + ' (' + city.region + ' India)</div></div>' +
+        const terrainBadge = city.terrainCategory === "HIGH_ALTITUDE" ? '<span style="font-size:0.72rem; background:#FEF3C7; color:#B45309; padding:2px 7px; border-radius:10px; font-weight:700;">⛰️ Hill / Dham</span>' : (city.terrainCategory === "AIRPORT_HUB" ? '<span style="font-size:0.72rem; background:#E0F2FE; color:#0369A1; padding:2px 7px; border-radius:10px; font-weight:700;">✈️ Airport</span>' : "");
+        return '<div class="city-suggest-item" data-index="' + idx + '" style="padding:11px 14px; cursor:pointer; border-bottom:1px solid #F1F5F9; display:flex; justify-content:space-between; align-items:center; transition:background 0.15s;">' +
+          '<div><div style="font-weight:700; color:#0F172A; font-size:0.95rem;">' + city.name + '</div>' +
+          '<div style="font-size:0.78rem; color:#64748B;">' + (city.state || "") + ' (' + (city.region || "") + ' India)</div></div>' +
           terrainBadge + '</div>';
       }).join("");
 
@@ -140,7 +144,7 @@ const CitySearch = (() => {
     function highlightItem(index) {
       const items = dropdown.querySelectorAll(".city-suggest-item");
       items.forEach((it, i) => {
-        it.style.background = (i === index) ? "#F1F5F9" : "#FFF";
+        it.style.background = (i === index) ? "#F1F5F9" : "#FFFFFF";
       });
       activeIndex = index;
     }
@@ -149,20 +153,29 @@ const CitySearch = (() => {
       inputEl.value = city.name;
       dropdown.style.display = "none";
       activeIndex = -1;
+      inputEl.dispatchEvent(new Event("input", { bubbles: true }));
+      inputEl.dispatchEvent(new Event("change", { bubbles: true }));
       if (typeof onSelect === "function") {
         onSelect(city);
       }
     }
 
-    inputEl.addEventListener("input", () => {
+    async function handleInputSearch() {
+      if (!isLoaded || citiesCache.length === 0) {
+        await init();
+      }
       const val = inputEl.value;
       if (val.trim().length >= 1) {
         const results = searchCities(val);
         renderSuggestions(results);
       } else {
-        dropdown.style.display = "none";
+        const topResults = searchCities("del", 6);
+        renderSuggestions(topResults);
       }
-    });
+    }
+
+    inputEl.addEventListener("input", handleInputSearch);
+    inputEl.addEventListener("focus", handleInputSearch);
 
     inputEl.addEventListener("keydown", (e) => {
       const items = dropdown.querySelectorAll(".city-suggest-item");
@@ -178,7 +191,8 @@ const CitySearch = (() => {
         } else if (e.key === "Enter") {
           if (activeIndex >= 0 && activeIndex < items.length) {
             e.preventDefault();
-            const results = searchCities(inputEl.value);
+            const val = inputEl.value;
+            const results = val.trim().length >= 1 ? searchCities(val) : searchCities("del", 6);
             if (results[activeIndex]) {
               selectCity(results[activeIndex]);
             }
@@ -192,7 +206,7 @@ const CitySearch = (() => {
     inputEl.addEventListener("blur", () => {
       setTimeout(() => {
         dropdown.style.display = "none";
-      }, 200);
+      }, 250);
     });
   }
 
