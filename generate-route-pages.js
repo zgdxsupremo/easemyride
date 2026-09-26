@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 const path = require('path');
 const ROUTES_CONFIG = require('./assets/js/routes-config.js');
 const CitySearch = require('./assets/js/city-search.js');
@@ -93,7 +93,7 @@ function generatePageHtml(route) {
       <div class="hero-content text-center" style="max-width:860px; margin:0 auto 2.5rem;">
         <div class="hero-badge">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>Verified Outstation Route</span>
+          <span>Outstation Cab Route</span>
         </div>
         <h1 class="hero-title" style="font-size:2.4rem;">${route.heading}</h1>
         <p class="hero-subtitle">
@@ -186,7 +186,7 @@ function generatePageHtml(route) {
           ${route.overview}
         </p>
         <p>
-          Traveling from <strong>${route.from}</strong> to <strong>${route.to}</strong> covers approximately <strong>${route.distanceKm} KM</strong> of well-maintained highways. Marg Drive guarantees punctual, door-to-door cab dispatch with zero hidden fees and no cancellation surprises.
+          Traveling from <strong>${route.from}</strong> to <strong>${route.to}</strong> covers approximately <strong>${route.distanceKm} KM</strong> of well-maintained highways. MargDrive coordinates punctual, door-to-door cab dispatch with independent commercial partners with zero hidden platform markups.
         </p>
       </div>
 
@@ -233,8 +233,8 @@ function generatePageHtml(route) {
         <div class="feature-box">
           <div class="feature-icon">🛡️</div>
           <div class="feature-content">
-            <h4>Verified Chauffeurs</h4>
-            <p>Every chauffeur is background-verified, licensed, and trained for highway and hill route navigation.</p>
+            <h4>Commercial Cab Partners</h4>
+            <p>Trips are arranged through independent commercial cab operators with commercial licensed vehicles and partner drivers.</p>
           </div>
         </div>
         <div class="feature-box">

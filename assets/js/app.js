@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Marg Drive — Homepage Controller (app.js)
  * 
  * Manages the multi-tab booking search widget, dynamic fields per service,
@@ -244,15 +244,22 @@ document.addEventListener("DOMContentLoaded", async () => {
           tripDays = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1);
         }
 
-        // Authoritative Search State Object
+        const cleanPhone = phoneVal ? FormValidator.sanitizePhoneNumber(phoneVal) : "";
+
+        // Authoritative Search State Object with Canonical Mapping
         const newSearchState = {
           serviceType: currentService,
+          pickupLocation: originCity,
+          dropLocation: destCity,
           pickupCity: originCity,
           dropCity: destCity,
+          fromCity: originCity,
+          toCity: destCity,
           pickupDate: pickupDateVal,
           pickupTime: pickupTimeVal || "08:00",
           returnDate: returnDateVal,
           returnTime: returnTimeVal,
+          phoneNumber: cleanPhone,
           airport: airportId,
           days: tripDays,
           packageId,
@@ -279,7 +286,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           days: tripDays
         });
 
-        if (phoneVal) params.set("phone", FormValidator.sanitizePhoneNumber(phoneVal));
+        if (cleanPhone) params.set("phone", cleanPhone);
         if (returnDateVal) params.set("returnDate", returnDateVal);
         if (returnTimeVal) params.set("returnTime", returnTimeVal);
         if (packageId) params.set("pkg", packageId);

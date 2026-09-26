@@ -58,6 +58,9 @@ async function initializeSearchFromUrl(pushToHistory = false) {
     const packageId = urlParams.get("pkg") || "8hr80km";
     const transferType = urlParams.get("transferType") || "airport_to_city";
 
+    const rawPhone = urlParams.get("phone") || "";
+    const phoneNumber = rawPhone.replace(/\D/g, "").slice(-10);
+
     // Recalculate authoritative distance
     let distData;
     try {
@@ -69,12 +72,17 @@ async function initializeSearchFromUrl(pushToHistory = false) {
     // Reconstruct fresh search state
     searchState = {
       serviceType,
+      pickupLocation: pickupCity,
+      dropLocation: dropCity,
       pickupCity,
       dropCity,
+      fromCity: pickupCity,
+      toCity: dropCity,
       pickupDate,
       pickupTime,
       returnDate,
       returnTime,
+      phoneNumber,
       airport,
       days,
       packageId,
@@ -90,15 +98,24 @@ async function initializeSearchFromUrl(pushToHistory = false) {
       saved = JSON.parse(localStorage.getItem(MargDriveConfig.storageKeys.lastSearch));
     } catch (e) {}
 
-    if (saved && saved.pickupCity && saved.dropCity) {
+    if (saved && (saved.pickupCity || saved.pickupLocation) && (saved.dropCity || saved.dropLocation)) {
+      const from = saved.pickupLocation || saved.pickupCity || saved.fromCity || "New Delhi";
+      const to = saved.dropLocation || saved.dropCity || saved.toCity || "Jaipur";
+      const phone = (saved.phoneNumber || saved.phone || "").toString().replace(/\D/g, "").slice(-10);
+
       searchState = {
         serviceType: saved.serviceType || "oneway",
-        pickupCity: saved.pickupCity || saved.fromCity || "New Delhi",
-        dropCity: saved.dropCity || saved.toCity || "Jaipur",
+        pickupLocation: from,
+        dropLocation: to,
+        pickupCity: from,
+        dropCity: to,
+        fromCity: from,
+        toCity: to,
         pickupDate: saved.pickupDate || todayStr,
         pickupTime: saved.pickupTime || "08:00",
         returnDate: saved.returnDate || "",
         returnTime: saved.returnTime || "",
+        phoneNumber: phone,
         airport: saved.airport || "",
         days: saved.days || 1,
         packageId: saved.packageId || "8hr80km",
@@ -110,12 +127,17 @@ async function initializeSearchFromUrl(pushToHistory = false) {
     } else {
       searchState = {
         serviceType: "oneway",
+        pickupLocation: "New Delhi",
+        dropLocation: "Jaipur",
         pickupCity: "New Delhi",
         dropCity: "Jaipur",
+        fromCity: "New Delhi",
+        toCity: "Jaipur",
         pickupDate: todayStr,
         pickupTime: "08:00",
         returnDate: "",
         returnTime: "",
+        phoneNumber: "",
         airport: "",
         days: 1,
         packageId: "8hr80km",
@@ -157,6 +179,7 @@ function updatePageMetaAndUrl(pushToHistory = true) {
   params.set("time", searchState.pickupTime);
   params.set("dist", searchState.distanceKm);
 
+  if (searchState.phoneNumber) params.set("phone", searchState.phoneNumber);
   if (searchState.returnDate) params.set("returnDate", searchState.returnDate);
   if (searchState.returnTime) params.set("returnTime", searchState.returnTime);
   if (searchState.days > 1) params.set("days", searchState.days);
@@ -281,8 +304,8 @@ function renderVehicleResults(state) {
             </div>
 
             <ul class="car-features-list">
-              <li>Clean & Sanitized</li>
-              <li>Trained Highway Chauffeur</li>
+              <li>Clean AC Partner Vehicle</li>
+              <li>Commercial Cab Partner</li>
               <li>24x7 Helpline Support</li>
               ${hasRegionalAdj || hasRouteAdj ? '<li style="color:var(--primary); font-weight:600;">Special Route Pricing Applied</li>' : ''}
             </ul>
@@ -347,12 +370,17 @@ function renderVehicleResults(state) {
       // Package full booking state
       const bookingIntent = {
         serviceType: searchState.serviceType,
+        pickupLocation: searchState.pickupCity,
+        dropLocation: searchState.dropCity,
         pickupCity: searchState.pickupCity,
         dropCity: searchState.dropCity,
+        fromCity: searchState.pickupCity,
+        toCity: searchState.dropCity,
         pickupDate: searchState.pickupDate,
         pickupTime: searchState.pickupTime,
         returnDate: searchState.returnDate,
         returnTime: searchState.returnTime,
+        phoneNumber: searchState.phoneNumber || "",
         distanceKm: searchState.distanceKm,
         carType,
         carName,
@@ -380,6 +408,7 @@ function renderVehicleResults(state) {
         dist: searchState.distanceKm
       });
 
+      if (searchState.phoneNumber) params.set("phone", searchState.phoneNumber);
       if (searchState.returnDate) params.append("returnDate", searchState.returnDate);
       if (searchState.returnTime) params.append("returnTime", searchState.returnTime);
 
@@ -431,8 +460,8 @@ function renderVehicleResults(state) {
             Applied Pricing Rules: <code>${appliedRules.join(", ")}</code>
           </div>
           <div class="transparent-note">
-            <strong>Transparent Fare Guarantee:</strong><br>
-            • Included: Vehicle, Chauffeur allowance, Fuel & Base km coverage.<br>
+            <strong>Transparent Fare Breakdown:</strong><br>
+            • Included: Partner Vehicle, Driver allowance, Fuel & Base km coverage.<br>
             • Excluded: Highway toll taxes, State entry permits, and Airport parking fees (payable directly as per actual receipts).
           </div>
         `;
@@ -456,6 +485,7 @@ function setupModifySearchModal() {
   const modTo = document.getElementById("mod-drop-city");
   const modDate = document.getElementById("mod-pickup-date");
   const modTime = document.getElementById("mod-pickup-time");
+  const modPhone = document.getElementById("mod-phone");
 
   // Attach city autocomplete to modal inputs if not already done
   if (typeof CitySearch !== "undefined" && typeof CitySearch.attachAutocomplete === "function") {
@@ -475,6 +505,7 @@ function setupModifySearchModal() {
         modDate.min = FormValidator.formatDateForInput(new Date());
       }
       if (modTime) modTime.value = searchState.pickupTime;
+      if (modPhone) modPhone.value = searchState.phoneNumber || "";
 
       UI.openModal("modal-modify-search");
     });
@@ -496,6 +527,8 @@ function setupModifySearchModal() {
       const newTo = modTo ? modTo.value.trim() : "";
       const newDate = modDate.value;
       const newTime = modTime.value;
+      const rawPhone = modPhone ? modPhone.value.trim() : (searchState.phoneNumber || "");
+      const cleanPhone = rawPhone ? rawPhone.replace(/\D/g, "").slice(-10) : "";
 
       if (!newFrom || (searchState.serviceType !== "local" && !newTo)) {
         UI.showToast("Missing Cities", "Please enter valid pickup and drop destinations.", "error");
@@ -508,15 +541,20 @@ function setupModifySearchModal() {
       try {
         const distData = await DistanceService.calculateRoadDistance(newFrom, newTo, searchState.serviceType);
 
-        // Completely replace searchState with fresh values
+        // Completely replace searchState with fresh canonical values
         searchState = {
           serviceType: searchState.serviceType,
+          pickupLocation: newFrom,
+          dropLocation: newTo,
           pickupCity: newFrom,
           dropCity: newTo,
+          fromCity: newFrom,
+          toCity: newTo,
           pickupDate: newDate,
           pickupTime: newTime,
           returnDate: searchState.returnDate || "",
           returnTime: searchState.returnTime || "",
+          phoneNumber: cleanPhone,
           airport: searchState.airport || "",
           days: searchState.days || 1,
           packageId: searchState.packageId || "8hr80km",
@@ -526,13 +564,16 @@ function setupModifySearchModal() {
           pricing: null
         };
 
-        // Update URL with pushState so history is clean
+        // 1. Log modified search immediately to Google Apps Script webhook & local cache
+        ApiService.logSearch(searchState);
+
+        // 2. Update URL with pushState so history is clean
         updatePageMetaAndUrl(true);
 
-        // Overwrite localStorage
+        // 3. Overwrite localStorage
         localStorage.setItem(MargDriveConfig.storageKeys.lastSearch, JSON.stringify(searchState));
 
-        // Re-render UI with recalculated fares
+        // 4. Re-render UI with recalculated fares
         renderRouteSummary(searchState);
         renderVehicleResults(searchState);
 

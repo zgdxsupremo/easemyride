@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Marg Drive — Booking Checkout Controller (booking.js)
  * 
  * Manages passenger details collection, journey address specifications,
@@ -422,14 +422,14 @@ function renderTripSidebar(bookingData) {
           <span>₹500</span>
         </div>
         <div class="fare-breakdown-row">
-          <span>Balance Payable to Chauffeur</span>
+          <span>Balance Payable to Partner Driver</span>
           <span>₹${Math.max(0, Number(bookingData.finalFare) - 500).toLocaleString("en-IN")}</span>
         </div>
       </div>
 
       <div class="transparent-note">
         <strong>Payment Policy:</strong><br>
-        A ₹500 booking fee confirms your cab assignment and locks the price. Balance fare is paid directly upon travel. Tolls & state permits extra per actuals.
+        The ₹500 advance confirmation amount is adjusted against the total trip fare. The remaining balance is payable directly to the partner driver during the journey. Tolls and state permits are extra per actual receipts.
       </div>
 
       <div style="font-size:0.85rem; color:var(--gray-500); display:flex; align-items:center; gap:0.4rem;">

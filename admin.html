@@ -101,10 +101,24 @@
           <option value="ALL">All Statuses</option>
           <option value="NEW">🟢 NEW</option>
           <option value="CONTACTED">🔵 CONTACTED</option>
-          <option value="CONFIRMED">🟡 CONFIRMED</option>
+          <option value="INTERESTED">⭐ INTERESTED</option>
+          <option value="BOOKED">✅ BOOKED</option>
+          <option value="NOT_INTERESTED">⚪ NOT INTERESTED</option>
+          <option value="NO_RESPONSE">⚠️ NO RESPONSE</option>
+          <option value="CONFIRMED">🟡 CONFIRMED (Bookings)</option>
           <option value="COMPLETED">🟣 COMPLETED</option>
           <option value="CANCELLED">🔴 CANCELLED</option>
         </select>
+
+        <select id="admin-filter-service" class="form-control" style="width:140px;">
+          <option value="ALL">All Services</option>
+          <option value="oneway">One Way</option>
+          <option value="roundtrip">Round Trip</option>
+          <option value="local">Local</option>
+          <option value="airport">Airport</option>
+        </select>
+
+        <input type="date" id="admin-filter-date" class="form-control" style="width:150px;" title="Filter by Date">
       </div>
 
       <div class="export-btns-group">
@@ -147,7 +161,7 @@
               <th>Booking ID</th>
               <th>Date & Time</th>
               <th>Customer</th>
-              <th>Phone</th>
+              <th>Phone & Actions</th>
               <th>Route & Address</th>
               <th>Journey Type</th>
               <th>Vehicle</th>
@@ -167,13 +181,15 @@
           <thead>
             <tr>
               <th>Search ID</th>
-              <th>Search Timestamp</th>
-              <th>Customer Phone</th>
+              <th>Search Time</th>
+              <th>Customer Phone & Follow-up</th>
               <th>Pickup Location</th>
               <th>Drop Location</th>
               <th>Scheduled Date/Time</th>
-              <th>Service Type</th>
-              <th>Distance KM</th>
+              <th>Service</th>
+              <th>Distance</th>
+              <th>Follow-up Status</th>
+              <th>Notes</th>
             </tr>
           </thead>
           <tbody id="admin-searches-tbody">

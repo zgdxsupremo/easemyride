@@ -52,12 +52,16 @@
       <div class="hero-content">
         <div class="hero-badge">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span>India's Trusted Intercity Cab Network</span>
+          <span>Outstation Cab Booking & Coordination Platform</span>
         </div>
-        <h1 class="hero-title">Your Ride. Your Route. Your Way.</h1>
+        <h1 class="hero-title">Outstation Cabs. Simple Booking. Reliable Partners.</h1>
         <p class="hero-subtitle">
-          Book reliable cabs for one-way trips, round trips, local sightseeing and airport transfers with transparent fares.
+          Book one-way, round-trip and airport transfer cabs across India. MargDrive coordinates your journey through independent commercial cab partners.
         </p>
+        <div style="display:flex; gap:0.75rem; justify-content:center; margin-top:1.25rem; flex-wrap:wrap;">
+          <a href="#hero-search-form" class="btn btn-primary btn-sm">Book a Cab</a>
+          <a href="https://wa.me/919041710472" target="_blank" class="btn btn-outline btn-sm" style="border-color:#25D366; color:#128C7E;">💬 WhatsApp Us</a>
+        </div>
       </div>
 
       <!-- Main Search & Booking Widget -->
@@ -72,13 +76,13 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
             <span>Round Trip</span>
           </button>
-          <button type="button" class="tab-btn" data-service="local" role="tab" aria-selected="false">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span>Local Sightseeing</span>
-          </button>
           <button type="button" class="tab-btn" data-service="airport" role="tab" aria-selected="false">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
             <span>Airport Transfer</span>
+          </button>
+          <button type="button" class="tab-btn" data-service="local" role="tab" aria-selected="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Local Sightseeing</span>
           </button>
         </div>
 
@@ -109,13 +113,13 @@
 
               <!-- Local Package Selector (Local Sightseeing) -->
               <div class="form-group" id="group-local-package" style="display:none;">
-                <label for="local-package-select">Package Duration</label>
+                <label for="local-package-select">Sightseeing Package</label>
                 <div class="input-with-icon">
                   <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   <select id="local-package-select" class="form-control">
-                    <option value="4hr40km">4 Hours / 40 KM (Half Day)</option>
-                    <option value="8hr80km" selected>8 Hours / 80 KM (Full Day)</option>
-                    <option value="12hr120km">12 Hours / 120 KM (Extended Tour)</option>
+                    <option value="4hr40km">4 Hours / 40 KM (Half Day Sightseeing)</option>
+                    <option value="8hr80km" selected>8 Hours / 80 KM (Full Day Sightseeing)</option>
+                    <option value="12hr120km">12 Hours / 120 KM (Extended City Tour)</option>
                   </select>
                 </div>
               </div>
@@ -206,7 +210,7 @@
             <div class="widget-action-bar">
               <div class="search-note">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                <span>Clean cars, Professional drivers & instant price calculation.</span>
+                <span>Clear fares, verified booking request & coordination with commercial cab partners.</span>
               </div>
               <button type="submit" id="btn-search-cabs" class="btn btn-primary btn-lg">
                 <span>Explore Available Cabs</span>
@@ -224,7 +228,7 @@
     <div class="container">
       <div class="section-header">
         <h2 class="section-title">Cab Services Tailored For You</h2>
-        <p class="section-subtitle">Whether traveling one-way between cities or heading to the airport, we provide transparent fares with zero return fare penalties.</p>
+        <p class="section-subtitle">Whether traveling one-way between cities or heading to the airport, we coordinate reliable outstation cabs with transparent distance-based fares.</p>
       </div>
 
       <div class="services-grid">
@@ -234,7 +238,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
           </div>
           <h3 class="service-title">One Way Cabs</h3>
-          <p class="service-desc">Travel between cities without paying for the return journey. Ideal for relocations, single meetings, or flights from nearby hubs.</p>
+          <p class="service-desc">Travel between cities without paying for return fares. Ideal for one-way journeys, relocations, business visits, or transit between regional hubs.</p>
           <a href="oneway.html" class="service-link">
             <span>Learn More</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
@@ -247,34 +251,34 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
           </div>
           <h3 class="service-title">Round Trip Cabs</h3>
-          <p class="service-desc">Comfortable outstation travel for your complete journey. Keep the dedicated car and driver with you throughout your vacation or multi-city trip.</p>
+          <p class="service-desc">Comfortable outstation travel for complete round-trip journeys. The assigned partner vehicle stays with you for scheduled travel and return.</p>
           <a href="roundtrip.html" class="service-link">
             <span>Learn More</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
         </div>
 
-        <!-- Service 3: Local Sightseeing -->
-        <div class="service-card">
-          <div class="service-icon-box">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </div>
-          <h3 class="service-title">Local Sightseeing</h3>
-          <p class="service-desc">Explore your city with flexible 4hr, 8hr or 12hr cab packages. Perfect for shopping sprees, family tours, and corporate errands.</p>
-          <a href="local.html" class="service-link">
-            <span>Learn More</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-          </a>
-        </div>
-
-        <!-- Service 4: Airport Transfer -->
+        <!-- Service 3: Airport Transfer -->
         <div class="service-card">
           <div class="service-icon-box">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
           </div>
           <h3 class="service-title">Airport Transfers</h3>
-          <p class="service-desc">Reliable, on-time pickups and drops to and from major airport terminals with zero surge charges and flight delay tracking.</p>
+          <p class="service-desc">Coordinated pickups and drops to and from major airport terminals with scheduled dispatch and transparent rates.</p>
           <a href="airport.html" class="service-link">
+            <span>Learn More</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+          </a>
+        </div>
+
+        <!-- Service 4: Local Sightseeing -->
+        <div class="service-card">
+          <div class="service-icon-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3 class="service-title">Local Sightseeing</h3>
+          <p class="service-desc">Explore cities and tourist destinations with dedicated half-day or full-day local packages on supported routes.</p>
+          <a href="local.html" class="service-link">
             <span>Learn More</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
           </a>
@@ -283,48 +287,76 @@
     </div>
   </section>
 
-  <!-- How It Works Timeline -->
-  <section class="section">
+  <!-- How MargDrive Works (6-Step Factual Flow) -->
+  <section class="section" id="how-it-works">
     <div class="container">
       <div class="section-header">
         <h2 class="section-title">How MargDrive Works</h2>
-        <p class="section-subtitle">Book your cab in four effortless steps with instant route pricing and confirmed booking credentials.</p>
+        <p class="section-subtitle">A straightforward, coordinated process from journey submission to ride completion.</p>
       </div>
 
-      <div class="steps-grid">
+      <div class="steps-grid" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
         <div class="step-card">
           <div class="step-number">1</div>
-          <h4 class="step-title">Enter Your Trip</h4>
-          <p class="step-desc">Choose your journey type, pickup/drop location, and scheduled travel date and time.</p>
+          <h4 class="step-title">Tell Us Your Journey</h4>
+          <p class="step-desc">Enter your pickup city, destination, date, time and preferred vehicle category.</p>
         </div>
 
         <div class="step-card">
           <div class="step-number">2</div>
-          <h4 class="step-title">Compare Ride Options</h4>
-          <p class="step-desc">Browse transparent vehicle fares across Hatchback, Sedan, SUV, and Innova Crysta categories.</p>
+          <h4 class="step-title">Get Your Fare</h4>
+          <p class="step-desc">MargDrive calculates and displays the applicable fare for your selected journey.</p>
         </div>
 
         <div class="step-card">
           <div class="step-number">3</div>
-          <h4 class="step-title">Choose Your Car</h4>
-          <p class="step-desc">Pick the vehicle that fits your group size, luggage requirements, and comfort preferences.</p>
+          <h4 class="step-title">We Arrange Your Cab</h4>
+          <p class="step-desc">Our operations team coordinates with an available commercial cab partner.</p>
         </div>
 
         <div class="step-card">
           <div class="step-number">4</div>
-          <h4 class="step-title">Confirm Your Booking</h4>
-          <p class="step-desc">Receive your unique Booking ID and SMS confirmation instantly. Pay directly during the trip.</p>
+          <h4 class="step-title">Booking Confirmed</h4>
+          <p class="step-desc">Once availability is confirmed, you receive your MargDrive Booking ID and trip details.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">5</div>
+          <h4 class="step-title">Driver Details Shared</h4>
+          <p class="step-desc">Driver and vehicle details are provided before pickup, according to the booking process.</p>
+        </div>
+
+        <div class="step-card">
+          <div class="step-number">6</div>
+          <h4 class="step-title">Complete Your Journey</h4>
+          <p class="step-desc">The assigned partner provides the vehicle and driver for the journey.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Why MargDrive (Trust & Safety) -->
-  <section class="section section-alt">
+  <!-- Clear Partner Model Section -->
+  <section class="section section-alt" id="partner-model">
+    <div class="container">
+      <div style="max-width:860px; margin:0 auto; text-align:center; background:#FFF; border:1px solid var(--gray-200); border-radius:16px; padding:2.5rem 2rem; box-shadow:var(--shadow-sm);">
+        <span class="hero-badge" style="margin-bottom:0.75rem; display:inline-flex;">Transparent Operating Model</span>
+        <h2 class="section-title" style="margin-bottom:1rem;">How MargDrive Works With Cab Partners</h2>
+        <p style="font-size:1.05rem; color:var(--gray-700); line-height:1.7; margin-bottom:1.5rem;">
+          MargDrive works with independent commercial cab operators and vehicle partners across India. When you submit a booking, our team coordinates with an appropriate partner based on route, vehicle category and availability. Once your booking is confirmed, we provide the relevant trip and driver details.
+        </p>
+        <div style="display:inline-block; background:var(--primary-subtle); color:var(--primary); padding:0.6rem 1.25rem; border-radius:30px; font-weight:700; font-size:0.95rem;">
+          MargDrive does not directly employ the driver assigned to every booking.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Customers Choose MargDrive (Trust Section) -->
+  <section class="section" id="why-choose-us">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title">Why Travel With MargDrive</h2>
-        <p class="section-subtitle">Designed to remove the friction and uncertainty of long-distance road travel in India.</p>
+        <h2 class="section-title">Why Customers Choose MargDrive</h2>
+        <p class="section-subtitle">Reliable outstation cab booking with transparent pricing and dedicated coordination support.</p>
       </div>
 
       <div class="features-grid">
@@ -333,38 +365,28 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
           </div>
           <div class="feature-content">
-            <h4>Transparent Pricing</h4>
-            <p>Know exactly what you pay. Clear distance-based formulas with no hidden surcharges or surprise fees.</p>
+            <h4>Clear Fares</h4>
+            <p>Know the applicable trip fare before confirmation. Clear distance-based rates with no hidden surcharges.</p>
           </div>
         </div>
 
         <div class="feature-box">
           <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
           <div class="feature-content">
-            <h4>Professional Highway Chauffeurs</h4>
-            <p>Experienced commercial drivers trained specifically in intercity highway safety and polite customer etiquette.</p>
+            <h4>Commercial Cab Partners</h4>
+            <p>Trips are arranged through independent commercial cab operators with commercial licensed vehicles.</p>
           </div>
         </div>
 
         <div class="feature-box">
           <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
           <div class="feature-content">
-            <h4>Multiple Car Categories</h4>
-            <p>From pocket-friendly Hatchbacks and Sedans to spacious Innovas and luxury Crystas for group outings.</p>
-          </div>
-        </div>
-
-        <div class="feature-box">
-          <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-          </div>
-          <div class="feature-content">
-            <h4>24x7 Customer Support</h4>
-            <p>Direct helpline and WhatsApp support available round-the-clock for route changes, updates and assistance.</p>
+            <h4>Booking Confirmation</h4>
+            <p>Receive your verified MargDrive Booking ID after availability is checked and confirmed.</p>
           </div>
         </div>
 
@@ -374,17 +396,27 @@
           </div>
           <div class="feature-content">
             <h4>Doorstep Pickup</h4>
-            <p>No walking to taxi stands. Your chauffeur arrives directly at your residence, hotel, or office landmark.</p>
+            <p>Pickup from your requested home, hotel, or office location, subject to road accessibility.</p>
           </div>
         </div>
 
         <div class="feature-box">
           <div class="feature-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
           </div>
           <div class="feature-content">
-            <h4>Low Booking Confirmation Fee</h4>
-            <p>Book your ride without upfront credit card obligations. Simple payment directly after your trip is completed.</p>
+            <h4>WhatsApp & Phone Support</h4>
+            <p>Direct assistance available via WhatsApp and helpline (9041710472) for route coordination and queries.</p>
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          </div>
+          <div class="feature-content">
+            <h4>Outstation Coverage</h4>
+            <p>Book one-way, round-trip, and airport transfer journeys across major intercity routes throughout India.</p>
           </div>
         </div>
       </div>
@@ -392,64 +424,15 @@
   </section>
 
   <!-- Popular Intercity Routes -->
-  <section class="section" id="popular-routes">
+  <section class="section section-alt" id="popular-routes">
     <div class="container">
       <div class="section-header">
         <h2 class="section-title">Popular Intercity Routes</h2>
-        <p class="section-subtitle">Click any route below to prefill your search with guaranteed baseline sedan fares.</p>
+        <p class="section-subtitle">Click any route below to prefill your search with baseline sedan fares.</p>
       </div>
 
       <div class="routes-grid" id="popular-routes-grid">
         <!-- Injected dynamically via app.js -->
-      </div>
-    </div>
-  </section>
-
-  <!-- Sample Customer Feedback / Testimonials -->
-  <section class="section section-alt">
-    <div class="container">
-      <div class="section-header">
-        <span class="hero-badge">Sample Customer Feedback</span>
-        <h2 class="section-title">What Our Riders Say</h2>
-        <p class="section-subtitle">Real experiences from travelers who booked intercity journeys with MargDrive.</p>
-      </div>
-
-      <div class="testimonials-grid">
-        <div class="testimonial-card">
-          <div class="testimonial-stars">★★★★★</div>
-          <p class="testimonial-text">"Booked an Innova Crysta for a family trip from Delhi to Chandigarh. Driver was on time at 6:00 AM, car was spotless, and the pricing was completely transparent."</p>
-          <div class="testimonial-author">
-            <div class="author-avatar">RS</div>
-            <div class="author-info">
-              <h5>Rohan Sharma</h5>
-              <span>Delhi ➔ Chandigarh (One Way)</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="testimonial-card">
-          <div class="testimonial-stars">★★★★★</div>
-          <p class="testimonial-text">"The one-way option saved us nearly 40% compared to local cab operators who charge two-way return fare. Easy booking and zero hassles."</p>
-          <div class="testimonial-author">
-            <div class="author-avatar">AK</div>
-            <div class="author-info">
-              <h5>Amanpreet Kaur</h5>
-              <span>Amritsar ➔ Chandigarh</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="testimonial-card">
-          <div class="testimonial-stars">★★★★★</div>
-          <p class="testimonial-text">"Booked an airport transfer from Kempegowda to city. Driver tracked my flight delay and waited without any extra hassle. Highly recommended!"</p>
-          <div class="testimonial-author">
-            <div class="author-avatar">VS</div>
-            <div class="author-info">
-              <h5>Vikas Sundaram</h5>
-              <span>BLR Airport ➔ Bengaluru City</span>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </section>
@@ -459,27 +442,67 @@
     <div class="container">
       <div class="section-header">
         <h2 class="section-title">Frequently Asked Questions</h2>
-        <p class="section-subtitle">Everything you need to know about booking with MargDrive.</p>
+        <p class="section-subtitle">Accurate information about booking, fares, and our partner coordination model.</p>
       </div>
 
       <div class="faq-container">
         <div class="faq-item active">
           <button class="faq-question" type="button">
-            <span>How do I book a cab with MargDrive?</span>
+            <span>Do you own the cars?</span>
             <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="faq-answer">
-            Simply select your service type (One Way, Round Trip, Local Sightseeing, or Airport Transfer), enter your pickup/drop cities, select your travel date/time, compare available car categories, and confirm your booking with your contact details. You'll receive a unique Booking ID instantly upon confirmation.
+            MargDrive works with independent commercial cab partners and does not directly operate every vehicle used for bookings.
           </div>
         </div>
 
         <div class="faq-item">
           <button class="faq-question" type="button">
-            <span>How is the fare calculated?</span>
+            <span>Are MargDrive drivers employees?</span>
             <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="faq-answer">
-            Our one-way fares are calculated using deterministic road distance formulas: for Sedan, <code>(Distance KM × 11) + ₹400</code>. Larger vehicle categories such as SUV and Innova Crysta have fixed transparent adjustments. For round trips, fares cover both legs with driver allowances included.
+            Drivers assigned to bookings are provided by our independent commercial cab partners.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>How is my cab arranged?</span>
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            After you submit your journey details, our operations team coordinates with a suitable partner based on route, vehicle category and availability.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>When is my booking confirmed?</span>
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            Your booking is confirmed after availability and the required confirmation/payment step are verified by our team.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>Will I receive driver details?</span>
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            Driver and vehicle details are shared according to the booking confirmation process before pickup.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" type="button">
+            <span>How does the payment work?</span>
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="faq-answer">
+            An advance confirmation amount of ₹500 is paid during booking verification and is adjusted against your total trip fare. The remaining trip fare is payable directly to the assigned cab partner/driver during the journey.
           </div>
         </div>
 
@@ -489,37 +512,17 @@
             <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="faq-answer">
-            No. The displayed base fare includes the vehicle, fuel, and chauffeur allowance. Highway toll taxes, state border entry permits, and airport parking fees are payable directly by the customer as per actual receipts generated during the journey.
+            No. The base fare includes the partner vehicle, fuel, and driver allowance. Highway toll taxes, state border entry permits, and parking fees are payable directly by the customer as per actual receipts generated during the journey.
           </div>
         </div>
 
         <div class="faq-item">
           <button class="faq-question" type="button">
-            <span>What happens after I submit my booking request?</span>
+            <span>Which services are available on MargDrive?</span>
             <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="faq-answer">
-            Your booking request is created (e.g. PAY-REQ-XXXXXX), and once the ₹500 confirmation fee is verified, your official Booking ID (e.g. MD-20260912-0001) is issued. Our operations team verifies driver availability and contacts you via phone/SMS with assigned driver and vehicle details prior to pickup.
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question" type="button">
-            <span>Which vehicle models are available in each category?</span>
-            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-answer">
-            We provide Hatchbacks (Swift, WagonR), Sedans (Dzire, Etios, Aura), SUVs (Ertiga, Carens), Innova (Standard 7-seater), and Innova Crysta (Executive luxury). Exact model availability depends on the specific route and schedule.
-          </div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question" type="button">
-            <span>Can I cancel or modify my booking?</span>
-            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-answer">
-            Yes. You can modify or cancel your booking free of charge up to 4 hours before the scheduled departure time by contacting our 24/7 helpline at +91 90417 10472.
+            We coordinate One-Way Cabs, Round-Trip Outstation Cabs, Airport Transfers, and Local Sightseeing on supported routes across India.
           </div>
         </div>
       </div>

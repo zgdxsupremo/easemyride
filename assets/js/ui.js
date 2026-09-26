@@ -276,8 +276,8 @@ const UI = (() => {
             <li><a href="index.html" class="${activePage === "home" ? "active" : ""}">Home</a></li>
             <li><a href="oneway.html" class="${activePage === "oneway" ? "active" : ""}">One Way</a></li>
             <li><a href="roundtrip.html" class="${activePage === "roundtrip" ? "active" : ""}">Round Trip</a></li>
-            <li><a href="local.html" class="${activePage === "local" ? "active" : ""}">Local Sightseeing</a></li>
             <li><a href="airport.html" class="${activePage === "airport" ? "active" : ""}">Airport Transfer</a></li>
+            <li><a href="local.html" class="${activePage === "local" ? "active" : ""}">Local Sightseeing</a></li>
             <li><a href="about.html" class="${activePage === "about" ? "active" : ""}">About</a></li>
             <li><a href="contact.html" class="${activePage === "contact" ? "active" : ""}">Contact</a></li>
           </ul>
@@ -315,7 +315,7 @@ const UI = (() => {
           <div class="container footer-grid">
             <div class="footer-brand">
               <div class="footer-logo">Marg <span class="highlight" style="color:var(--accent);">Drive</span></div>
-              <p class="footer-tagline">India's Premier On-Demand Intercity & Airport Cab Service. Professional chauffeurs, transparent fares, and 24/7 dedicated helpline support.</p>
+              <p class="footer-tagline">Outstation Cab Booking & Coordination Platform. Book reliable journeys across India coordinated through independent commercial cab partners with clear fares and dedicated support.</p>
               <div class="footer-contact-info">
                 <div class="footer-contact-item">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
@@ -333,8 +333,8 @@ const UI = (() => {
               <ul class="footer-links">
                 <li><a href="oneway.html">One Way Cabs</a></li>
                 <li><a href="roundtrip.html">Round Trip Cabs</a></li>
-                <li><a href="local.html">Local Sightseeing</a></li>
                 <li><a href="airport.html">Airport Transfers</a></li>
+                <li><a href="local.html">Local Sightseeing</a></li>
                 <li><a href="index.html#popular-routes">Popular Routes</a></li>
               </ul>
             </div>
@@ -342,7 +342,8 @@ const UI = (() => {
             <div class="footer-col">
               <h4>Company</h4>
               <ul class="footer-links">
-                <li><a href="about.html">About Us</a></li>
+                <li><a href="about.html">About MargDrive</a></li>
+                <li><a href="faq.html">FAQ</a></li>
                 <li><a href="contact.html">Contact Support</a></li>
               </ul>
             </div>
@@ -359,8 +360,8 @@ const UI = (() => {
         </div>
         <div class="footer-bottom">
           <div class="container footer-bottom-flex">
-            <p>© 2026 Marg Drive. All rights reserved. Built for seamless travel.</p>
-            <p style="font-size:0.8rem; color:var(--gray-500);">Tolls, parking & applicable taxes extra as per actuals.</p>
+            <p>© 2026 MargDrive. Outstation cab booking coordination platform. All rights reserved.</p>
+            <p style="font-size:0.8rem; color:var(--gray-500);">Tolls, parking & state permits extra as per actual receipts.</p>
           </div>
         </div>
       `;
@@ -384,9 +385,10 @@ const UI = (() => {
           <li><a href="index.html">Home</a></li>
           <li><a href="oneway.html">One Way Cabs</a></li>
           <li><a href="roundtrip.html">Round Trip Cabs</a></li>
-          <li><a href="local.html">Local Sightseeing</a></li>
           <li><a href="airport.html">Airport Transfers</a></li>
+          <li><a href="local.html">Local Sightseeing</a></li>
           <li><a href="about.html">About Us</a></li>
+          <li><a href="faq.html">FAQ</a></li>
           <li><a href="contact.html">Contact</a></li>
         </ul>
         <div class="mobile-nav-footer">

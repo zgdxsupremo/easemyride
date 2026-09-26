@@ -47,13 +47,13 @@
     <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 1.25rem; flex-wrap:wrap; gap:0.5rem;">
       <h2 style="font-size:1.6rem; color:var(--secondary);">Select Your Ride Option</h2>
       <div style="font-size:0.85rem; color:var(--gray-500);">
-        All prices are inclusive of Chauffeur Allowance & Fuel
+        Base fares include Partner Vehicle, Driver Allowance & Fuel
       </div>
     </div>
 
     <!-- Transparent Pricing Notice Banner -->
     <div class="transparent-note" style="margin-bottom: 1.5rem; border-left: 4px solid var(--accent); background: #FFFBEB;">
-      <strong>⚠️ Fare Disclosure:</strong> Displayed base fares are estimated according to distance formulas. Toll taxes, state border entry permits, and airport parking fees are payable as per actual receipts during the journey.
+      <strong>⚠️ Fare Disclosure:</strong> Displayed base fares are calculated by distance formulas. Advance confirmation fee of ₹500 is adjusted against total fare; remaining balance is paid directly to the partner driver. Highway tolls, state border permits, and parking are payable as per actual receipts.
     </div>
 
     <!-- Vehicle Cards Grid -->
@@ -88,6 +88,10 @@
               <label for="mod-pickup-time">Pickup Time</label>
               <input type="time" id="mod-pickup-time" class="form-control" required>
             </div>
+          </div>
+          <div class="form-group">
+            <label for="mod-phone">Mobile Number (Optional)</label>
+            <input type="tel" id="mod-phone" class="form-control" placeholder="10-digit mobile number" maxlength="10">
           </div>
           <div style="margin-top: 1rem;">
             <button type="submit" class="btn btn-primary btn-block">Update & Recalculate Fares</button>

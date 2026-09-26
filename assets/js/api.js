@@ -65,25 +65,66 @@ const ApiService = (() => {
    * @returns {Promise<object>}
    */
   async function logSearch(searchData) {
+    if (!searchData) return { success: false };
+
+    const pickupLocation = (
+      searchData.pickupLocation ||
+      searchData.pickupCity ||
+      searchData.pickup ||
+      searchData.from ||
+      searchData.fromCity ||
+      searchData.origin ||
+      ""
+    ).toString().trim();
+
+    const dropLocation = (
+      searchData.dropLocation ||
+      searchData.dropCity ||
+      searchData.drop ||
+      searchData.to ||
+      searchData.toCity ||
+      searchData.destination ||
+      ""
+    ).toString().trim();
+
+    const rawPhone = (
+      searchData.phoneNumber ||
+      searchData.phone ||
+      searchData.customerPhone ||
+      searchData.mobile ||
+      searchData.mobileNumber ||
+      ""
+    ).toString().trim();
+
+    const phoneNumber = rawPhone.replace(/\D/g, "").slice(-10);
+
     const payload = {
       action: "log_search",
-      searchId: generateSearchId(),
-      timestamp: new Date().toISOString(),
+      searchId: searchData.searchId || generateSearchId(),
+      timestamp: searchData.timestamp || new Date().toISOString(),
       serviceType: searchData.serviceType || "oneway",
-      pickupLocation: searchData.pickupLocation || searchData.fromCity || "",
-      dropLocation: searchData.dropLocation || searchData.toCity || "",
+      pickupLocation: pickupLocation,
+      dropLocation: dropLocation,
       pickupDate: searchData.pickupDate || "",
       returnDate: searchData.returnDate || "",
       pickupTime: searchData.pickupTime || "",
-      phoneNumber: searchData.phoneNumber || "",
-      distanceKm: searchData.distanceKm || 0,
-      searchStatus: "COMPLETED",
-      userAgent: navigator.userAgent || "Web Client"
+      phoneNumber: phoneNumber,
+      distanceKm: Number(searchData.distanceKm) || 0,
+      searchStatus: searchData.searchStatus || "COMPLETED",
+      userAgent: (typeof navigator !== "undefined" && navigator.userAgent) || "Web Client",
+      followUpStatus: searchData.followUpStatus || "NEW",
+      followUpNotes: searchData.followUpNotes || "",
+      lastFollowUp: searchData.lastFollowUp || ""
     };
 
     // Store in localStorage for admin preview
     try {
       const searches = JSON.parse(localStorage.getItem("emr_searches_log") || "[]");
+      // Remove previous entry with same searchId if exists
+      const existingIdx = searches.findIndex((s) => s.searchId === payload.searchId);
+      if (existingIdx !== -1) {
+        searches.splice(existingIdx, 1);
+      }
       searches.unshift(payload);
       if (searches.length > 500) searches.pop();
       localStorage.setItem("emr_searches_log", JSON.stringify(searches));
@@ -92,7 +133,7 @@ const ApiService = (() => {
     }
 
     if (!isAppsScriptConfigured()) {
-      return { success: true, searchId: payload.searchId, simulated: true };
+      return { success: true, searchId: payload.searchId, simulated: true, payload };
     }
 
     try {
@@ -101,17 +142,17 @@ const ApiService = (() => {
 
       const response = await fetch(window.MargDriveConfig.appsScriptUrl, {
         method: "POST",
-        mode: "no-cors", // Apps Script redirects require handling or no-cors for simple submission
+        mode: "no-cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify(payload),
         signal: controller.signal
       });
       clearTimeout(timeoutId);
 
-      return { success: true, searchId: payload.searchId };
+      return { success: true, searchId: payload.searchId, payload };
     } catch (err) {
       console.warn("Apps Script search logging notice:", err.message);
-      return { success: true, searchId: payload.searchId, fallback: true };
+      return { success: true, searchId: payload.searchId, fallback: true, payload };
     }
   }
 
@@ -265,7 +306,9 @@ const ApiService = (() => {
     }
 
     // Local Storage Mock Admin Provider
-    const bookings = JSON.parse(localStorage.getItem(MargDriveConfig.storageKeys.completedBookings) || "[]");
+    const config = (typeof window !== "undefined" && window.MargDriveConfig) || { storageKeys: {} };
+    const bookingStorageKey = (config.storageKeys && config.storageKeys.completedBookings) || "emr_completed_bookings";
+    const bookings = JSON.parse(localStorage.getItem(bookingStorageKey) || "[]");
     const searches = JSON.parse(localStorage.getItem("emr_searches_log") || "[]");
 
     // Add initial mock records if completely empty for immediate demonstration
@@ -324,7 +367,7 @@ const ApiService = (() => {
           smsStatus: "SENT"
         }
       ];
-      localStorage.setItem(MargDriveConfig.storageKeys.completedBookings, JSON.stringify(demoBookings));
+      localStorage.setItem(bookingStorageKey, JSON.stringify(demoBookings));
       bookings.push(...demoBookings);
     }
 
@@ -342,12 +385,15 @@ const ApiService = (() => {
    * @param {string} newStatus - 'NEW' | 'CONTACTED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'
    */
   async function updateBookingStatus(bookingId, newStatus) {
+    const config = (typeof window !== "undefined" && window.MargDriveConfig) || { storageKeys: {} };
+    const bookingStorageKey = (config.storageKeys && config.storageKeys.completedBookings) || "emr_completed_bookings";
+
     try {
-      const list = JSON.parse(localStorage.getItem(MargDriveConfig.storageKeys.completedBookings) || "[]");
+      const list = JSON.parse(localStorage.getItem(bookingStorageKey) || "[]");
       const idx = list.findIndex((b) => b.bookingId === bookingId);
       if (idx !== -1) {
         list[idx].bookingStatus = newStatus;
-        localStorage.setItem(MargDriveConfig.storageKeys.completedBookings, JSON.stringify(list));
+        localStorage.setItem(bookingStorageKey, JSON.stringify(list));
       }
     } catch (e) {
       console.warn("Storage update notice:", e);
@@ -372,6 +418,48 @@ const ApiService = (() => {
     return { success: true, bookingId, newStatus };
   }
 
+  /**
+   * Updates follow-up status and notes of a search lead in Google Sheets / Local Storage.
+   * @param {string} searchId
+   * @param {string} followUpStatus - 'NEW' | 'CONTACTED' | 'INTERESTED' | 'BOOKED' | 'NOT INTERESTED' | 'NO RESPONSE'
+   * @param {string} followUpNotes
+   */
+  async function updateSearchStatus(searchId, followUpStatus, followUpNotes = "") {
+    const timestamp = new Date().toISOString();
+    try {
+      const searches = JSON.parse(localStorage.getItem("emr_searches_log") || "[]");
+      const idx = searches.findIndex((s) => s.searchId === searchId);
+      if (idx !== -1) {
+        searches[idx].followUpStatus = followUpStatus;
+        if (followUpNotes !== undefined) searches[idx].followUpNotes = followUpNotes;
+        searches[idx].lastFollowUp = timestamp;
+        localStorage.setItem("emr_searches_log", JSON.stringify(searches));
+      }
+    } catch (e) {
+      console.warn("Search storage update notice:", e);
+    }
+
+    if (isAppsScriptConfigured()) {
+      try {
+        await fetch(window.MargDriveConfig.appsScriptUrl, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({
+            action: "update_search_status",
+            searchId: searchId,
+            followUpStatus: followUpStatus,
+            followUpNotes: followUpNotes,
+            lastFollowUp: timestamp
+          })
+        });
+      } catch (err) {
+        console.warn("Apps Script search status update failed:", err);
+      }
+    }
+
+    return { success: true, searchId, followUpStatus, followUpNotes };
+  }
+
   return {
     isAppsScriptConfigured,
     generateFallbackBookingId,
@@ -382,7 +470,8 @@ const ApiService = (() => {
     submitPaymentProof,
     getBookingStatus,
     getAdminData,
-    updateBookingStatus
+    updateBookingStatus,
+    updateSearchStatus
   };
 })();
 

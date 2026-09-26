@@ -250,7 +250,7 @@ function renderSearchesTable(searches) {
   if (searches.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" style="text-align:center; padding: 2.5rem; color:var(--gray-500);">
+        <td colspan="10" style="text-align:center; padding: 2.5rem; color:var(--gray-500);">
           No search queries logged yet. Every time a customer searches on the homepage, it appears here automatically.
         </td>
       </tr>
@@ -263,9 +263,19 @@ function renderSearchesTable(searches) {
       const ts = s.timestamp ? new Date(s.timestamp).toLocaleString("en-IN", { dateStyle: "short", timeStyle: "short" }) : "Recent";
       const pickupDate = s.pickupDate ? UI.formatDateDisplay(s.pickupDate) : "Flexible";
       const pickupTime = s.pickupTime ? UI.formatTimeDisplay(s.pickupTime) : "";
+      const fromLoc = s.pickupLocation || s.pickupCity || s.fromCity || "N/A";
+      const toLoc = s.dropLocation || s.dropCity || s.toCity || "N/A";
+
+      const rawPhone = (s.phoneNumber || s.phone || s.customerPhone || s.mobile || "").toString().replace(/\D/g, "").slice(-10);
+      const hasPhone = rawPhone.length === 10;
+      const telLink = hasPhone ? `tel:+91${rawPhone}` : "#";
+      const waMsg = encodeURIComponent(`Hello! We noticed you checked cabs from ${fromLoc} to ${toLoc} on MargDrive. How can we assist you with your booking?`);
+      const waLink = hasPhone ? `https://wa.me/91${rawPhone}?text=${waMsg}` : "#";
+
+      const followUp = (s.followUpStatus || "NEW").toUpperCase().replace(/[\s-]/g, "_");
 
       return `
-        <tr>
+        <tr id="search-row-${s.searchId}">
           <td>
             <span class="booking-id-tag" style="color:var(--gray-700); font-size:0.8rem;">${UI.escapeHTML(s.searchId || "SRC-N/A")}</span>
           </td>
@@ -273,13 +283,25 @@ function renderSearchesTable(searches) {
             <div style="font-size:0.85rem; color:var(--gray-700);">${ts}</div>
           </td>
           <td>
-            ${s.phoneNumber ? `<a href="tel:+91${s.phoneNumber}" style="font-weight:700; color:var(--primary);">📞 +91 ${UI.escapeHTML(s.phoneNumber)}</a>` : '<span style="color:var(--gray-400);">Not provided</span>'}
+            ${hasPhone ? `
+              <div>
+                <strong style="color:var(--secondary); font-size:0.95rem;">+91 ${UI.escapeHTML(rawPhone)}</strong>
+              </div>
+              <div style="margin-top:0.35rem; display:flex; gap:0.4rem; flex-wrap:wrap;">
+                <a href="${telLink}" class="btn btn-sm btn-primary" style="padding:0.2rem 0.5rem; font-size:0.75rem; text-decoration:none; display:inline-flex; align-items:center; gap:0.2rem;">
+                  📞 Call
+                </a>
+                <a href="${waLink}" target="_blank" class="btn btn-sm btn-outline" style="padding:0.2rem 0.5rem; font-size:0.75rem; text-decoration:none; border-color:#25D366; color:#128C7E; display:inline-flex; align-items:center; gap:0.2rem;">
+                  💬 WhatsApp
+                </a>
+              </div>
+            ` : '<span style="color:var(--gray-400); font-style:italic;">Not provided</span>'}
           </td>
           <td>
-            <strong>${UI.escapeHTML(s.pickupLocation || s.fromCity || "N/A")}</strong>
+            <strong style="color:var(--secondary);">${UI.escapeHTML(fromLoc)}</strong>
           </td>
           <td>
-            <strong>${UI.escapeHTML(s.dropLocation || s.toCity || "N/A")}</strong>
+            <strong style="color:var(--primary);">${UI.escapeHTML(toLoc)}</strong>
           </td>
           <td>
             <div>${pickupDate}</div>
@@ -293,10 +315,67 @@ function renderSearchesTable(searches) {
           <td>
             <strong>${s.distanceKm || 0} KM</strong>
           </td>
+          <td>
+            <select class="form-control search-status-select" data-search-id="${s.searchId}" style="padding:0.35rem 0.5rem; font-size:0.8rem; font-weight:700; width:130px;">
+              <option value="NEW" ${followUp === "NEW" ? "selected" : ""}>🟢 NEW</option>
+              <option value="CONTACTED" ${followUp === "CONTACTED" ? "selected" : ""}>🔵 CONTACTED</option>
+              <option value="INTERESTED" ${followUp === "INTERESTED" ? "selected" : ""}>⭐ INTERESTED</option>
+              <option value="BOOKED" ${followUp === "BOOKED" ? "selected" : ""}>✅ BOOKED</option>
+              <option value="NOT_INTERESTED" ${followUp === "NOT_INTERESTED" ? "selected" : ""}>⚪ NOT INTERESTED</option>
+              <option value="NO_RESPONSE" ${followUp === "NO_RESPONSE" ? "selected" : ""}>⚠️ NO RESPONSE</option>
+            </select>
+          </td>
+          <td>
+            <input 
+              type="text" 
+              class="form-control search-notes-input" 
+              data-search-id="${s.searchId}" 
+              value="${UI.escapeHTML(s.followUpNotes || '')}" 
+              placeholder="Add follow-up note..." 
+              style="font-size:0.8rem; padding:0.3rem 0.5rem; width:160px;"
+            >
+          </td>
         </tr>
       `;
     })
     .join("");
+
+  // Attach search status change handlers
+  tbody.querySelectorAll(".search-status-select").forEach((select) => {
+    select.addEventListener("change", async () => {
+      const sId = select.dataset.searchId;
+      const newStatus = select.value;
+      const noteInput = tbody.querySelector(`.search-notes-input[data-search-id="${sId}"]`);
+      const notes = noteInput ? noteInput.value.trim() : "";
+
+      UI.showToast("Updating", `Updating lead status for ${sId}...`, "info", 1200);
+      await ApiService.updateSearchStatus(sId, newStatus, notes);
+      UI.showToast("Saved", `Search lead ${sId} marked as ${newStatus}`, "success");
+
+      // Update cached record
+      const match = adminDataCache.searches.find((s) => s.searchId === sId);
+      if (match) {
+        match.followUpStatus = newStatus;
+        match.followUpNotes = notes;
+      }
+    });
+  });
+
+  // Attach search notes input handlers
+  tbody.querySelectorAll(".search-notes-input").forEach((input) => {
+    input.addEventListener("change", async () => {
+      const sId = input.dataset.searchId;
+      const notes = input.value.trim();
+      const statusSelect = tbody.querySelector(`.search-status-select[data-search-id="${sId}"]`);
+      const status = statusSelect ? statusSelect.value : "NEW";
+
+      await ApiService.updateSearchStatus(sId, status, notes);
+      UI.showToast("Note Saved", `Note saved for search ${sId}`, "success", 1200);
+
+      const match = adminDataCache.searches.find((s) => s.searchId === sId);
+      if (match) match.followUpNotes = notes;
+    });
+  });
 }
 
 /**
@@ -305,20 +384,31 @@ function renderSearchesTable(searches) {
 function setupTableFilters() {
   const searchInput = document.getElementById("admin-table-search");
   const statusFilter = document.getElementById("admin-filter-status");
+  const serviceFilter = document.getElementById("admin-filter-service");
+  const dateFilter = document.getElementById("admin-filter-date");
 
   if (searchInput) searchInput.addEventListener("input", applyFilters);
   if (statusFilter) statusFilter.addEventListener("change", applyFilters);
+  if (serviceFilter) serviceFilter.addEventListener("change", applyFilters);
+  if (dateFilter) dateFilter.addEventListener("change", applyFilters);
 }
 
 function applyFilters() {
   const searchInput = document.getElementById("admin-table-search");
   const statusFilter = document.getElementById("admin-filter-status");
+  const serviceFilter = document.getElementById("admin-filter-service");
+  const dateFilter = document.getElementById("admin-filter-date");
+
   const term = searchInput ? searchInput.value.trim().toLowerCase() : "";
   const status = statusFilter ? statusFilter.value : "ALL";
+  const service = serviceFilter ? serviceFilter.value : "ALL";
+  const date = dateFilter ? dateFilter.value : "";
 
   if (currentAdminTab === "bookings") {
     let filtered = adminDataCache.bookings.filter((b) => {
       const matchStatus = status === "ALL" || b.bookingStatus === status;
+      const matchService = service === "ALL" || (b.serviceType && b.serviceType.toLowerCase() === service) || (b.journeyType && b.journeyType.toLowerCase().includes(service));
+      const matchDate = !date || (b.startingDate && b.startingDate === date) || (b.bookingTimestamp && b.bookingTimestamp.startsWith(date));
       const matchTerm =
         !term ||
         (b.bookingId && b.bookingId.toLowerCase().includes(term)) ||
@@ -327,20 +417,27 @@ function applyFilters() {
         (b.fromCity && b.fromCity.toLowerCase().includes(term)) ||
         (b.toCity && b.toCity.toLowerCase().includes(term));
 
-      return matchStatus && matchTerm;
+      return matchStatus && matchService && matchDate && matchTerm;
     });
 
     renderBookingsTable(filtered);
   } else {
     let filtered = adminDataCache.searches.filter((s) => {
+      const followUp = (s.followUpStatus || "NEW").toUpperCase().replace(/[\s-]/g, "_");
+      const matchStatus = status === "ALL" || followUp === status || s.searchStatus === status;
+      const matchService = service === "ALL" || (s.serviceType && s.serviceType.toLowerCase() === service);
+      const matchDate = !date || (s.pickupDate && s.pickupDate === date) || (s.timestamp && s.timestamp.startsWith(date));
+
       const matchTerm =
         !term ||
         (s.searchId && s.searchId.toLowerCase().includes(term)) ||
         (s.phoneNumber && s.phoneNumber.includes(term)) ||
         (s.pickupLocation && s.pickupLocation.toLowerCase().includes(term)) ||
-        (s.dropLocation && s.dropLocation.toLowerCase().includes(term));
+        (s.dropLocation && s.dropLocation.toLowerCase().includes(term)) ||
+        (s.pickupCity && s.pickupCity.toLowerCase().includes(term)) ||
+        (s.dropCity && s.dropCity.toLowerCase().includes(term));
 
-      return matchTerm;
+      return matchStatus && matchService && matchDate && matchTerm;
     });
 
     renderSearchesTable(filtered);
@@ -402,29 +499,33 @@ function setupCsvExports() {
     };
   }
 
-  // 2. Export Searches CSV
+  // 2. Export Searches CSV (Columns A to O)
   const exportSearchesBtn = document.getElementById("btn-export-searches-csv");
   if (exportSearchesBtn) {
     exportSearchesBtn.onclick = () => {
       const headers = [
         "Search ID", "Timestamp", "Service Type", "Pickup Location",
         "Drop Location", "Pickup Date", "Return Date", "Pickup Time",
-        "Phone Number", "Distance KM", "Search Status", "User Agent"
+        "Phone Number", "Distance KM", "Search Status", "User Agent",
+        "Follow-up Status", "Follow-up Notes", "Last Follow-up"
       ];
 
       const rows = adminDataCache.searches.map((s) => [
         escapeCsvCell(s.searchId || ApiService.generateSearchId()),
         escapeCsvCell(s.timestamp || new Date().toISOString()),
         escapeCsvCell(s.serviceType || "oneway"),
-        escapeCsvCell(s.pickupLocation || s.fromCity || ""),
-        escapeCsvCell(s.dropLocation || s.toCity || ""),
+        escapeCsvCell(s.pickupLocation || s.pickupCity || s.fromCity || ""),
+        escapeCsvCell(s.dropLocation || s.dropCity || s.toCity || ""),
         escapeCsvCell(s.pickupDate || ""),
         escapeCsvCell(s.returnDate || ""),
         escapeCsvCell(s.pickupTime || ""),
         escapeCsvCell(s.phoneNumber || ""),
         escapeCsvCell(s.distanceKm || 0),
         escapeCsvCell(s.searchStatus || "COMPLETED"),
-        escapeCsvCell(s.userAgent || "Web Client")
+        escapeCsvCell(s.userAgent || "Web Client"),
+        escapeCsvCell(s.followUpStatus || "NEW"),
+        escapeCsvCell(s.followUpNotes || ""),
+        escapeCsvCell(s.lastFollowUp || "")
       ].join(","));
 
       const csvContent = [headers.join(","), ...rows].join("\r\n");

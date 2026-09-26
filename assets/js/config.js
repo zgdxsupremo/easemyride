@@ -26,7 +26,7 @@ const MargDriveConfig = {
   apiBaseUrl: window.location.port === "4000" ? "/api" : "http://localhost:4000/api",
 
   // Google Apps Script Web App URL
-  appsScriptUrl: "https://script.google.com/macros/s/AKfycbxcRY8baCdbv4oLlcqAS6kxhRt4k4M1vFaWMG-llhSm9MF7mXepp2KXKC39fUYbcDhN2Q/exec",
+  appsScriptUrl: "https://script.google.com/macros/s/AKfycbyfRQp11jGHrkQ-RJhtoAfa_akYsfsZoM4G-b33x5mL0zl07UW-CYZ9tomenZIxXEJ_BA/exec",
 
   // Distance & Routing API Configuration
   // To use Google Maps Routes/Distance Matrix API, provide the public browser key here

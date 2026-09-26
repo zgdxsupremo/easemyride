@@ -56,6 +56,8 @@ function doPost(e) {
 
     if (action === "log_search") {
       return handleLogSearch(data);
+    } else if (action === "update_search_status") {
+      return handleUpdateSearchStatus(data);
     } else if (action === "create_booking") {
       return handleCreateBooking(data);
     } else if (action === "update_booking_status") {
@@ -97,19 +99,58 @@ function handleLogSearch(data) {
   var searchId = data.searchId || ("SRC-" + Date.now().toString(36).toUpperCase());
   var timestamp = data.timestamp || new Date().toISOString();
 
+  // Canonical Field Normalization Layer
+  var pickupLocation = (
+    data.pickupLocation ||
+    data.pickupCity ||
+    data.pickup ||
+    data.fromCity ||
+    data.from ||
+    data.origin ||
+    ""
+  ).toString().trim();
+
+  var dropLocation = (
+    data.dropLocation ||
+    data.dropCity ||
+    data.drop ||
+    data.toCity ||
+    data.to ||
+    data.destination ||
+    ""
+  ).toString().trim();
+
+  var rawPhone = (
+    data.phoneNumber ||
+    data.phone ||
+    data.customerPhone ||
+    data.mobile ||
+    data.mobileNumber ||
+    ""
+  ).toString().trim();
+
+  var phoneNumber = rawPhone.replace(/\D/g, "").slice(-10);
+
+  // Server-side logging for verification
+  Logger.log("MargDrive Search Log -> ID: " + searchId + " | Pickup: " + pickupLocation + " | Drop: " + dropLocation + " | Phone: " + phoneNumber);
+
+  // Explicit Column Mapping: A through O
   var row = [
     searchId,
     timestamp,
     data.serviceType || "oneway",
-    data.pickupLocation || data.fromCity || "",
-    data.dropLocation || data.toCity || "",
+    pickupLocation,
+    dropLocation,
     data.pickupDate || "",
     data.returnDate || "",
     data.pickupTime || "",
-    data.phoneNumber || "",
+    phoneNumber,
     Number(data.distanceKm) || 0,
     data.searchStatus || "COMPLETED",
-    data.userAgent || "Web Client"
+    data.userAgent || "Web Client",
+    data.followUpStatus || "NEW",
+    data.followUpNotes || "",
+    data.lastFollowUp || ""
   ];
 
   sheet.appendRow(row);
@@ -117,8 +158,45 @@ function handleLogSearch(data) {
   return createJsonResponse({
     success: true,
     searchId: searchId,
+    pickupLocation: pickupLocation,
+    dropLocation: dropLocation,
+    phoneNumber: phoneNumber,
     message: "Search recorded successfully."
   });
+}
+
+/**
+ * Updates follow-up status and notes of a search inquiry in SEARCHES sheet.
+ */
+function handleUpdateSearchStatus(data) {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName(SHEET_SEARCHES);
+  if (!sheet) return createJsonResponse({ success: false, message: "Searches sheet not found" }, 404);
+
+  var targetId = data.searchId;
+  var newStatus = (data.followUpStatus || "CONTACTED").toUpperCase();
+  var notes = data.followUpNotes !== undefined ? String(data.followUpNotes) : "";
+  var timestamp = data.lastFollowUp || new Date().toISOString();
+
+  var dataRange = sheet.getDataRange();
+  var values = dataRange.getValues();
+
+  var foundRow = -1;
+  for (var i = 1; i < values.length; i++) {
+    if (values[i][0] == targetId) {
+      foundRow = i + 1;
+      break;
+    }
+  }
+
+  if (foundRow !== -1) {
+    sheet.getRange(foundRow, 13).setValue(newStatus); // Column M: Follow-up Status
+    if (notes) sheet.getRange(foundRow, 14).setValue(notes); // Column N: Follow-up Notes
+    sheet.getRange(foundRow, 15).setValue(timestamp); // Column O: Last Follow-up
+    return createJsonResponse({ success: true, searchId: targetId, followUpStatus: newStatus, followUpNotes: notes });
+  }
+
+  return createJsonResponse({ success: false, message: "Search ID not found: " + targetId }, 404);
 }
 
 /**
@@ -362,10 +440,13 @@ function handleGetAdminData() {
         pickupDate: sValues[j][5],
         returnDate: sValues[j][6],
         pickupTime: sValues[j][7],
-        phoneNumber: sValues[j][8],
+        phoneNumber: sValues[j][8] ? String(sValues[j][8]) : "",
         distanceKm: sValues[j][9],
         searchStatus: sValues[j][10],
-        userAgent: sValues[j][11]
+        userAgent: sValues[j][11],
+        followUpStatus: sValues[j][12] || "NEW",
+        followUpNotes: sValues[j][13] || "",
+        lastFollowUp: sValues[j][14] || ""
       });
     }
   }
@@ -467,7 +548,7 @@ function getSearchesHeaders() {
   return [
     "Search ID", "Timestamp", "Service Type", "Pickup Location", "Drop Location",
     "Pickup Date", "Return Date", "Pickup Time", "Phone Number", "Distance KM",
-    "Search Status", "User Agent"
+    "Search Status", "User Agent", "Follow-up Status", "Follow-up Notes", "Last Follow-up"
   ];
 }
 
