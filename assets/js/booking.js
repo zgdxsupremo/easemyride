@@ -13,28 +13,52 @@ const PAYMENT_CONFIG = {
   merchantName: "Marg Drive"
 };
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   UI.injectNavigation("booking");
 
-  // Read active booking state from localStorage or query params
-  let bookingData = null;
-  try {
-    bookingData = JSON.parse(localStorage.getItem(MargDriveConfig.storageKeys.activeBooking));
-  } catch (e) {
-    bookingData = null;
+  // Ensure CitySearch is initialized synchronously
+  if (typeof CitySearch !== "undefined" && typeof CitySearch.init === "function") {
+    await CitySearch.init();
   }
 
-  // If missing, parse from query params
+  // 1. Authoritative check: Prioritize URL parameters over stale localStorage
   const urlParams = new URLSearchParams(window.location.search);
-  if (!bookingData && urlParams.has("from")) {
-    const dist = parseInt(urlParams.get("dist"), 10) || 250;
+  let bookingData = null;
+
+  if (urlParams.has("from") || urlParams.has("to") || urlParams.has("service") || urlParams.has("car")) {
+    const pickupCity = (urlParams.get("from") || "Delhi").trim();
+    const dropCity = (urlParams.get("to") || "Chandigarh").trim();
+    const serviceType = urlParams.get("service") || "oneway";
     const car = urlParams.get("car") || "sedan";
-    const quote = PricingEngine.calculateOneWayFare({ distanceKm: dist, carType: car, origin: urlParams.get("from") || "Delhi", destination: urlParams.get("to") || "Chandigarh" });
+    const distParam = parseInt(urlParams.get("dist"), 10);
+    const fareParam = parseInt(urlParams.get("fare"), 10);
+
+    // Calculate distance dynamically if missing or zero
+    let dist = distParam;
+    if (!dist || isNaN(dist) || dist <= 0) {
+      if (typeof DistanceService !== "undefined" && typeof DistanceService.estimateDistanceByCoordinates === "function") {
+        dist = DistanceService.estimateDistanceByCoordinates(pickupCity, dropCity);
+      } else {
+        dist = 250;
+      }
+    }
+
+    const quote = PricingEngine.calculateOneWayFare({
+      distanceKm: dist,
+      carType: car,
+      origin: pickupCity,
+      destination: dropCity
+    });
+
+    const config = window.MargDriveConfig || { vehicles: [] };
+    const vehMeta = (config.vehicles && config.vehicles.find((v) => v.id === car)) || { name: "Sedan" };
 
     bookingData = {
-      serviceType: urlParams.get("service") || "oneway",
-      pickupCity: urlParams.get("from") || "Delhi",
-      dropCity: urlParams.get("to") || "Chandigarh",
+      serviceType: serviceType,
+      pickupCity: pickupCity,
+      dropCity: dropCity,
+      fromCity: pickupCity,
+      toCity: dropCity,
       pickupDate: urlParams.get("date") || FormValidator.formatDateForInput(new Date()),
       pickupTime: urlParams.get("time") || "08:00",
       returnDate: urlParams.get("returnDate") || "",
@@ -42,14 +66,27 @@ document.addEventListener("DOMContentLoaded", () => {
       phoneNumber: urlParams.get("phone") || "",
       distanceKm: dist,
       carType: car,
-      carName: (MargDriveConfig.vehicles.find((v) => v.id === car) || { name: "Sedan" }).name,
-      finalFare: parseInt(urlParams.get("fare"), 10) || quote.finalFare,
-      baseFare: quote.baseFareSedan,
-      vehicleAdjustment: quote.vehicleAdjustment,
+      carName: vehMeta.name,
+      finalFare: (!isNaN(fareParam) && fareParam > 0) ? fareParam : quote.finalFare,
+      baseFare: quote.baseFareSedan || quote.baseFare || 3000,
+      vehicleAdjustment: quote.vehicleAdjustment || 0,
       regionalAdjustment: quote.regionalAdjustment || 0,
       specialRouteAdjustment: quote.specialRouteAdjustment || 0,
-      appliedRules: quote.appliedRules || []
+      appliedRules: quote.appliedRules || [],
+      pricingVersion: PricingEngine.PRICING_VERSION
     };
+
+    // Synchronize to localStorage so state persists across page interactions
+    try {
+      localStorage.setItem(MargDriveConfig.storageKeys.activeBooking, JSON.stringify(bookingData));
+    } catch (e) {}
+  } else {
+    // Fall back to active booking state from localStorage
+    try {
+      bookingData = JSON.parse(localStorage.getItem(MargDriveConfig.storageKeys.activeBooking));
+    } catch (e) {
+      bookingData = null;
+    }
   }
 
   if (!bookingData) {
@@ -57,17 +94,20 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Pre-fill form fields and summary
+  // Pre-fill form fields, attach live listeners, and populate summary
   initBookingForm(bookingData);
 });
 
 /**
- * Initializes and populates booking form fields and trip sidebar.
+ * Initializes and populates booking form fields, attaches live trip update listeners, and renders trip sidebar.
  */
 function initBookingForm(bookingData) {
   const form = document.getElementById("booking-checkout-form");
   const nameInput = document.getElementById("passenger-name");
   const phoneInput = document.getElementById("passenger-phone");
+  const pickupCityInput = document.getElementById("booking-pickup-city");
+  const dropCityInput = document.getElementById("booking-drop-city");
+  const dropCityGroup = document.getElementById("group-booking-drop-city");
   const pickupAddressInput = document.getElementById("pickup-address");
   const dropAddressInput = document.getElementById("drop-address");
   const startDateInput = document.getElementById("booking-start-date");
@@ -77,7 +117,18 @@ function initBookingForm(bookingData) {
   const returnTimeInput = document.getElementById("booking-return-time");
   const remarksInput = document.getElementById("trip-remarks");
 
-  // Pre-populate known fields
+  // Pre-populate route cities
+  if (pickupCityInput) {
+    pickupCityInput.value = bookingData.pickupCity || bookingData.fromCity || "";
+  }
+  if (dropCityInput) {
+    dropCityInput.value = bookingData.dropCity || bookingData.toCity || "";
+    if (bookingData.serviceType === "local" && dropCityGroup) {
+      dropCityGroup.style.display = "none";
+    }
+  }
+
+  // Pre-populate known contact and journey fields
   if (phoneInput && bookingData.phoneNumber) {
     phoneInput.value = bookingData.phoneNumber;
   }
@@ -98,7 +149,99 @@ function initBookingForm(bookingData) {
     returnGroup.style.display = "none";
   }
 
-  // Populate Sidebar Summary
+  // Live Trip Update Handler: Updates summary live on screen whenever user types/changes fields
+  let updateDebounceTimer = null;
+  async function handleLiveTripUpdate(recalcDistanceAndFare = true) {
+    const pickupCity = pickupCityInput ? pickupCityInput.value.trim() : (bookingData.pickupCity || "Delhi");
+    const dropCity = dropCityInput ? dropCityInput.value.trim() : (bookingData.dropCity || "Chandigarh");
+    const startDate = startDateInput ? startDateInput.value : bookingData.pickupDate;
+    const startTime = startTimeInput ? startTimeInput.value : bookingData.pickupTime;
+    const returnDate = returnDateInput ? returnDateInput.value : bookingData.returnDate;
+    const returnTime = returnTimeInput ? returnTimeInput.value : bookingData.returnTime;
+
+    bookingData.pickupCity = pickupCity;
+    bookingData.fromCity = pickupCity;
+    bookingData.dropCity = dropCity;
+    bookingData.toCity = dropCity;
+    bookingData.pickupDate = startDate;
+    bookingData.pickupTime = startTime;
+    bookingData.returnDate = returnDate;
+    bookingData.returnTime = returnTime;
+
+    if (recalcDistanceAndFare && pickupCity && (dropCity || bookingData.serviceType === "local")) {
+      try {
+        if (typeof DistanceService !== "undefined") {
+          const distData = await DistanceService.calculateRoadDistance(pickupCity, dropCity, bookingData.serviceType);
+          bookingData.distanceKm = distData.distanceKm;
+
+          if (typeof PricingEngine !== "undefined") {
+            const quote = PricingEngine.calculateFare({
+              serviceType: bookingData.serviceType,
+              origin: pickupCity,
+              destination: dropCity,
+              distanceKm: distData.distanceKm,
+              vehicleType: bookingData.carType,
+              days: 1
+            });
+
+            bookingData.finalFare = quote.finalFare;
+            bookingData.baseFare = quote.baseFareSedan || quote.baseFare;
+            bookingData.vehicleAdjustment = quote.vehicleAdjustment || 0;
+            bookingData.regionalAdjustment = quote.regionalAdjustment || 0;
+            bookingData.specialRouteAdjustment = quote.specialRouteAdjustment || 0;
+            bookingData.appliedRules = quote.appliedRules || [];
+          }
+        }
+      } catch (err) {
+        // Keep current fare on error
+      }
+    }
+
+    // Immediately update sidebar summary in live time
+    renderTripSidebar(bookingData);
+
+    // Save synchronized state to localStorage
+    try {
+      localStorage.setItem(MargDriveConfig.storageKeys.activeBooking, JSON.stringify(bookingData));
+    } catch (e) {}
+  }
+
+  // Bind Pan-India Autocomplete to Pickup & Destination City fields
+  if (typeof CitySearch !== "undefined" && typeof CitySearch.attachAutocomplete === "function") {
+    if (pickupCityInput) {
+      CitySearch.attachAutocomplete(pickupCityInput, () => {
+        handleLiveTripUpdate(true);
+      });
+    }
+    if (dropCityInput) {
+      CitySearch.attachAutocomplete(dropCityInput, () => {
+        handleLiveTripUpdate(true);
+      });
+    }
+  }
+
+  // Attach live change listeners for real-time sidebar summary updates
+  const liveInputs = [
+    { el: pickupCityInput, recalc: true },
+    { el: dropCityInput, recalc: true },
+    { el: startDateInput, recalc: false },
+    { el: startTimeInput, recalc: false },
+    { el: returnDateInput, recalc: false },
+    { el: returnTimeInput, recalc: false }
+  ];
+
+  liveInputs.forEach(({ el, recalc }) => {
+    if (!el) return;
+    el.addEventListener("input", () => {
+      clearTimeout(updateDebounceTimer);
+      updateDebounceTimer = setTimeout(() => handleLiveTripUpdate(recalc), 250);
+    });
+    el.addEventListener("change", () => {
+      handleLiveTripUpdate(recalc);
+    });
+  });
+
+  // Populate Sidebar Summary initially
   renderTripSidebar(bookingData);
 
   // Attach error-clearing handlers
@@ -112,6 +255,8 @@ function initBookingForm(bookingData) {
       let hasError = false;
       const fullName = nameInput ? nameInput.value.trim() : "";
       const phone = phoneInput ? phoneInput.value.trim() : "";
+      const pickupCity = pickupCityInput ? pickupCityInput.value.trim() : (bookingData.pickupCity || "");
+      const dropCity = dropCityInput ? dropCityInput.value.trim() : (bookingData.dropCity || "");
       const pickupAddress = pickupAddressInput ? pickupAddressInput.value.trim() : "";
       const dropAddress = dropAddressInput ? dropAddressInput.value.trim() : "";
       const startDate = startDateInput ? startDateInput.value : "";
@@ -126,9 +271,19 @@ function initBookingForm(bookingData) {
         hasError = true;
       }
 
-      // 3. Phone Validation
+      // 2. Phone Validation
       if (!phone || !FormValidator.isValidIndianPhone(phone)) {
         FormValidator.showFieldError(phoneInput, "Enter a valid 10-digit Indian mobile number.");
+        hasError = true;
+      }
+
+      // 3. Route City Validation
+      if (!pickupCity) {
+        if (pickupCityInput) FormValidator.showFieldError(pickupCityInput, "Please enter pickup city.");
+        hasError = true;
+      }
+      if (bookingData.serviceType !== "local" && !dropCity) {
+        if (dropCityInput) FormValidator.showFieldError(dropCityInput, "Please enter destination drop city.");
         hasError = true;
       }
 
@@ -166,10 +321,10 @@ function initBookingForm(bookingData) {
         customerName: fullName,
         customerPhone: FormValidator.sanitizePhoneNumber(phone),
         serviceType: bookingData.serviceType,
-        fromCity: bookingData.pickupCity || bookingData.fromCity,
-        toCity: bookingData.dropCity || bookingData.toCity,
+        fromCity: pickupCity || bookingData.pickupCity || bookingData.fromCity,
+        toCity: dropCity || bookingData.dropCity || bookingData.toCity,
         pickupAddress: pickupAddress,
-        dropoffAddress: dropAddress || `${bookingData.dropCity || bookingData.toCity} City Center`,
+        dropoffAddress: dropAddress || `${dropCity || bookingData.dropCity || bookingData.toCity} City Center`,
         pickupDate: startDate,
         pickupTime: startTime || "08:00",
         returnDate: returnDate || null,

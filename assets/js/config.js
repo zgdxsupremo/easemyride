@@ -23,7 +23,7 @@ const MargDriveConfig = {
   upiDeepLink: "upi://pay?pa=7973785807@kotakbank&pn=Marg%20Drive&am=500&cu=INR",
 
   // API Backend Base URL
-  apiBaseUrl: window.location.port === "4000" ? "/api" : "http://localhost:4000/api",
+  apiBaseUrl: (typeof window !== "undefined" && window.location && window.location.port === "4000") ? "/api" : "http://localhost:4000/api",
 
   // Google Apps Script Web App URL
   appsScriptUrl: "https://script.google.com/macros/s/AKfycbyfRQp11jGHrkQ-RJhtoAfa_akYsfsZoM4G-b33x5mL0zl07UW-CYZ9tomenZIxXEJ_BA/exec",
